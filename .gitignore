@@ -6,3 +6,4 @@ klase.txt
 poros_*.html
 .venv/
 .superpowers/
+.jupyterlite.doit.db

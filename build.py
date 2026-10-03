@@ -97,9 +97,20 @@ def irasyk_notebooka(kelias=NOTEBOOKAS):
     return kelias
 
 
+def _jupyter_vykdomasis():
+    """Suranda `jupyter` šalia aktyvaus Python, nes PATH gali jo neturėti
+    (pvz., kai venv neaktyvuotas, tik iškviestas per ./.venv/bin/python)."""
+    kandidatas = Path(sys.executable).parent / "jupyter"
+    if kandidatas.exists():
+        return str(kandidatas)
+    return "jupyter"
+
+
 def statyk_svetaine(isvestis="dist"):
-    # Patvirtinta komanda (žr. 10 užduoties 1 žingsnį):
-    komanda = ["jupyter", "lite", "build", "--output-dir", isvestis]
+    # Patvirtinta komanda (žr. 10 užduoties 1 žingsnį): `jupyter lite build`
+    # priima lygiai --contents <failas> (kartojamas) ir --output-dir <dir>,
+    # patvirtinta `jupyter lite build --help` prieš jupyterlite-core 0.8.5.
+    komanda = [_jupyter_vykdomasis(), "lite", "build", "--output-dir", isvestis]
     for failas in BUNDLE:
         komanda += ["--contents", failas]
     print("▶", " ".join(komanda))

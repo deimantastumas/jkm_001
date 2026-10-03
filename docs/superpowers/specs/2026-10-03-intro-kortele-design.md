@@ -122,6 +122,14 @@ pradek_misija("Birutė", "ZEBRAI2026")
 Prints the pupil's own flag and the rules. The class code comes off the
 whiteboard.
 
+Because the flag is derived from the name, **the pupil and their partners must
+use the same spelling of that name**. `pradek_misija` therefore prints the
+exact string to tell classmates — *"Sakyk draugams: Birutė"* — and `poros.py`
+builds its table from the same `klase.txt` entries, so the projected name and
+the registered name match by construction. A pupil who registers with their
+full name while the table shows only their first name gets a different flag;
+this is the most likely field failure after normalisation itself.
+
 **Main cell** — re-run once per conversation:
 
 ```python
@@ -129,7 +137,16 @@ irasyk_flaga("Tomas", "TOMA-4417", "krepšinis")
 misijos_bukle()
 ```
 
-**Bonus cell** for fast finishers — dictionary, tuple unpacking, `for` loop:
+This starter ships with an example partner whose flag cannot verify, so
+`irasyk_flaga` applies the same placeholder rule as challenge 1: the canonical
+example name/flag pair is recognised and answered with *"čia pavyzdys — įrašyk
+tikro draugo duomenis"* rather than a failure message. A pupil who runs the
+cell unedited learns what the cell does without being told they got it wrong.
+
+**Bonus** for fast finishers — dictionary, tuple unpacking, `for` loop. Shown
+as an example in the markdown cell, not as pre-filled starter code, because
+pre-filling it with unverifiable flags would produce three error messages on
+first run:
 
 ```python
 draugai = {
@@ -257,9 +274,12 @@ produce the same flag. This is the single most likely field failure and is the
 first test written.
 
 **`irasyk_flaga`** recomputes the partner's flag from the name and the class
-code stored by `pradek_misija`, and compares. It rejects: the pupil's own name,
-a name already recorded, and a mismatched flag — each with a Lithuanian hint
-naming what to check, never a traceback. It never consults a roster, so a pupil
+code stored by `pradek_misija`, and compares. In order, it handles: the
+canonical example pair from the starter cell (treated as a placeholder, not a
+failure), the pupil's own name, a name already recorded, and a mismatched flag
+— each with a distinct Lithuanian hint naming what to check, never a
+traceback. Calling it before `pradek_misija` is also a message, not an
+exception. It never consults a roster, so a pupil
 whose assigned partner is absent or busy can simply go to someone else; the
 `tikslas=3` target is a count, not a list.
 
@@ -370,7 +390,8 @@ teenagers.
   names, and between class codes for the same name.
 - Flag format: letter block 2–4 `A–Z`, hyphen, exactly 4 digits.
 - Names with too few usable letters produce a message, not an exception.
-- `irasyk_flaga` rejects own name, duplicate name, and wrong flag, each with a
+- `irasyk_flaga` handles the starter placeholder pair, own name, duplicate
+  name, wrong flag, and being called before `pradek_misija` — each with a
   distinct message, and raises nothing.
 - `surinkti()` preserves insertion order and the pupil's original spelling of
   the partner's name for display.
@@ -436,6 +457,7 @@ deploy. These get the teacher guide's manual pre-lesson checklist instead.
 | Duplicate first names collide to one flag | `poros.py` refuses to emit a table until resolved |
 | 18 teenagers moving on a timer is loud and some drift | Timed rounds, projected table; two concentric circles with the outer one rotating if the room is small |
 | A pupil finishes challenge 1 late and misses round 1 | `irasyk_flaga` accepts any classmate, so they catch up with whoever is free |
+| A pupil registers a different name spelling than their partners use | `pradek_misija` prints the exact string to tell classmates; `poros.py` table is built from the same `klase.txt` entries |
 
 ## 12. Out of scope
 

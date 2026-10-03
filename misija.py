@@ -78,6 +78,9 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
     if not isinstance(klases_kodas, str) or not klases_kodas.strip():
         print("❗ Klasės kodas užrašytas ant lentos — įrašyk jį kabutėse.")
         return
+    if isinstance(tikslas, bool) or not isinstance(tikslas, int) or tikslas <= 0:
+        print("❗ tikslas turi būti teigiamas skaičius be kabučių, pvz. tikslas=3.")
+        return
 
     try:
         flagas = generuok_flaga(vardas, klases_kodas)

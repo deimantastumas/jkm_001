@@ -184,3 +184,15 @@ def test_pradek_misija_kitu_vardu_pradeda_is_naujo():
     misija.irasyk_flaga("Tomas", misija.generuok_flaga("Tomas", "ZEBRAI2026"), "krepšinis")
     misija.pradek_misija("Eglė", "ZEBRAI2026")
     assert misija.surinkti() == []
+
+
+# Fix round 1, Important finding: tikslas was never validated, so a bad
+# value (e.g. a quoted string) stored into module state would raise a raw
+# TypeError later, inside misijos_bukle's "_tikslas - len(_draugai)" — which
+# runs automatically from irasyk_flaga's success path. Must print, not raise,
+# and must leave the mission unregistered.
+@pytest.mark.parametrize("blogas_tikslas", ["3", 0, -1])
+def test_pradek_misija_su_netinkamu_tikslu_nemeta_klaidos_ir_neregistruoja(capsys, blogas_tikslas):
+    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=blogas_tikslas)
+    assert "tikslas" in capsys.readouterr().out.lower()
+    assert misija._mano_norm is None

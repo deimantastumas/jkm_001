@@ -34,7 +34,11 @@ def test_eilute_visada_to_paties_plocio():
     tema = kortele._TEMOS["klasika"]
     trumpa = kortele._eilute("a", tema)
     ilga = kortele._eilute("Birutė ąčęėįšųūž", tema)
-    assert kortele._plotis(trumpa) == kortele._plotis(ilga)
+    # 46 vidaus stulpeliai + po vieną rėmelio simbolį iš abiejų pusių.
+    # Lygybė tarp dviejų eilučių viena pati praeitų ir tada, jei plotis
+    # nuplauktų abiejose vienodai.
+    assert kortele._plotis(trumpa) == 48
+    assert kortele._plotis(ilga) == 48
 
 
 def test_apkarpyk_nuline_plocis_grazina_tuscia():
@@ -81,8 +85,15 @@ def test_kortele_labai_ilga_reiksme_nesulauzo_remelio(capsys):
 
 @pytest.mark.parametrize("tema", ["klasika", "matrix", "neonas"])
 def test_visos_temos_atvaizduojamos(tema, capsys):
-    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas", tema=tema)
-    assert _eilutes(capsys)
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas",
+                          pomegiai=["futbolas", "šunys"], tema=tema)
+    isvestis = "\n".join(_eilutes(capsys))
+    assert isvestis
+    for simbolis in kortele._TEMOS[tema].values():
+        assert simbolis in isvestis, f"{tema}: trūksta rėmelio simbolio {simbolis!r}"
+    svetimi = {s for kita, zenklai in kortele._TEMOS.items() if kita != tema
+               for s in zenklai.values()} - set(kortele._TEMOS[tema].values())
+    assert not (svetimi & set(isvestis)), f"{tema} atvaizdavo svetimos temos rėmelį"
 
 
 def test_nezinoma_tema_duoda_zinute(capsys):
@@ -155,3 +166,20 @@ def test_bendri_interesai_paimami_is_misijos_kai_nenurodyti(capsys):
         assert "krepšinis" in capsys.readouterr().out
     finally:
         misija._atstatyk()
+
+
+def test_slapyvardis_ne_tekstas_duoda_zinute(capsys):
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas", slapyvardis=42)
+    assert "slapyvardis" in capsys.readouterr().out
+    assert kortele._paskutine_kortele is None
+
+
+# Minor fix: kortelė rodė „su Tomas – krepšinis“; taisyklinga lietuvių kalba
+# reikalautų įnagininko („su Tomu“), o linksniavimas yra už pamokos ribų.
+def test_bendri_interesai_rodomi_be_prielinksnio(capsys):
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas",
+                          bendri_interesai=[("Tomas", "krepšinis")])
+    isvestis = capsys.readouterr().out
+    assert "Tomas – krepšinis" in isvestis
+    assert "su Tomas" not in isvestis
+

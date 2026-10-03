@@ -84,7 +84,9 @@ def test_pradek_misija_parodo_flaga_ir_vardo_rasyba(capsys):
 
 def test_pradek_misija_su_netinkamu_vardu_nemeta_klaidos(capsys):
     misija.pradek_misija("Ą", "ZEBRAI2026")
-    assert "vard" in capsys.readouterr().out.lower()
+    isvestis = capsys.readouterr().out
+    assert "per mažai raidžių" in isvestis
+    assert misija._mano_norm is None
 
 
 def _pradek():
@@ -119,7 +121,7 @@ def test_irasyk_flaga_atmeta_savo_varda(capsys):
     _pradek()
     misija.irasyk_flaga("Birutė", misija.generuok_flaga("Birutė", "ZEBRAI2026"), "aš pats")
     assert misija.surinkti() == []
-    assert "sav" in capsys.readouterr().out.lower()
+    assert "Savo paties flago įrašyti negalima" in capsys.readouterr().out
 
 
 def test_irasyk_flaga_atmeta_pakartotina_varda(capsys):
@@ -136,7 +138,7 @@ def test_irasyk_flaga_atmeta_neteisinga_flaga(capsys):
     _pradek()
     misija.irasyk_flaga("Tomas", "TOMA-0001", "krepšinis")
     assert misija.surinkti() == []
-    assert "flag" in capsys.readouterr().out.lower()
+    assert "Flagas netinka" in capsys.readouterr().out
 
 
 def test_irasyk_flaga_pries_pradek_misija_yra_zinute(capsys):
@@ -188,11 +190,170 @@ def test_pradek_misija_kitu_vardu_pradeda_is_naujo():
 
 # Fix round 1, Important finding: tikslas was never validated, so a bad
 # value (e.g. a quoted string) stored into module state would raise a raw
-# TypeError later, inside misijos_bukle's "_tikslas - len(_draugai)" — which
-# runs automatically from irasyk_flaga's success path. Must print, not raise,
-# and must leave the mission unregistered.
+# TypeError later, inside misijos_bukle's "_tikslas - len(_draugai)". Must
+# print, not raise, and must leave the mission unregistered.
 @pytest.mark.parametrize("blogas_tikslas", ["3", 0, -1])
 def test_pradek_misija_su_netinkamu_tikslu_nemeta_klaidos_ir_neregistruoja(capsys, blogas_tikslas):
     misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=blogas_tikslas)
     assert "tikslas" in capsys.readouterr().out.lower()
     assert misija._mano_norm is None
+
+
+# ---- C2: nepataisytas pradek_misija langelis ----
+#
+# Nepaleistas pro šalį šis langelis anksčiau registruodavo mokinį kaip „Jonas“
+# su kodu „KLASES-KODAS“ ir linksmai pranešdavo „🎒 Misija pradėta!“. Toliau
+# visi trys raundai žlugdavo, o žinutė kaltindavo partnerio vardą.
+
+@pytest.mark.parametrize("kodas", ["KLASES-KODAS", "klases-kodas", " KLASES-KODAS "])
+def test_pradek_misija_su_vietazenkliu_kodu_neregistruoja(capsys, kodas):
+    misija.pradek_misija("Jonas", kodas)
+    isvestis = capsys.readouterr().out
+    assert isvestis.startswith("✋")
+    assert "Misija pradėta" not in isvestis
+    assert misija._mano_norm is None
+
+
+def test_nepataisytas_starteris_nepradeda_misijos(capsys):
+    """Tiksliai tai, ką mokinys paleidžia, nieko nepakeitęs."""
+    import kortele
+    misija.pradek_misija(kortele.PLACEHOLDERS["vardas"], misija.PLACEHOLDER_KODAS)
+    isvestis = capsys.readouterr().out
+    assert "Misija pradėta" not in isvestis
+    assert misija._mano_norm is None
+
+
+def test_vardo_vietazenklis_tik_perspeja_bet_registruoja(capsys):
+    """Tikras Jonas privalo galėti dalyvauti.
+
+    Vardas, skirtingai nei klasės kodas, dviprasmis: „Jonas“ yra vienas
+    dažniausių tikrų vardų. Blokavimas jį išmestų iš visos antros pamokos
+    dalies, tad čia tik priminimas.
+    """
+    import kortele
+    misija.pradek_misija(kortele.PLACEHOLDERS["vardas"], "ZEBRAI2026")
+    isvestis = capsys.readouterr().out
+    assert "✋" in isvestis
+    assert "Misija pradėta" in isvestis
+    assert misija._mano_norm == "jonas"
+
+
+def test_placeholder_kodas_atitinka_starterio_langeli():
+    from pathlib import Path
+    import build
+    starteris = build.pakeisk(Path("turinys/05_misija.py").read_text(encoding="utf-8"))
+    assert f'"{misija.PLACEHOLDER_KODAS}"' in starteris
+
+
+def test_neteisingas_flagas_nurodo_ir_savo_pradek_misija_eilute(capsys):
+    _pradek()
+    misija.irasyk_flaga("Tomas", "TOMA-0001", "krepšinis")
+    isvestis = capsys.readouterr().out
+    assert "pradek_misija" in isvestis
+    assert "klasės kodą" in isvestis
+
+
+# ---- I2: vardo pataisymas ištrina flagus — bet nebe tyliai ----
+
+def test_vardo_pakeitimas_pranesa_apie_prarastus_flagus(capsys):
+    misija.pradek_misija("Birutė", "ZEBRAI2026")
+    misija.irasyk_flaga("Tomas", misija.generuok_flaga("Tomas", "ZEBRAI2026"), "krepšinis")
+    capsys.readouterr()
+    misija.pradek_misija("Birutė Jonaitytė", "ZEBRAI2026")
+    isvestis = capsys.readouterr().out
+    assert "⚠" in isvestis
+    assert "nebegalioja" in isvestis
+    assert misija.surinkti() == []
+
+
+def test_vardo_pakeitimas_be_surinktu_flagu_netyli_be_reikalo(capsys):
+    misija.pradek_misija("Birutė", "ZEBRAI2026")
+    capsys.readouterr()
+    misija.pradek_misija("Eglė", "ZEBRAI2026")
+    assert "⚠" not in capsys.readouterr().out
+
+
+# ---- I4: misijos_bukle kviečiama starterio langelio, ne irasyk_flaga ----
+
+def test_irasyk_flaga_nedubliuoja_bukles(capsys):
+    _pradek()
+    misija.irasyk_flaga("Tomas", misija.generuok_flaga("Tomas", "ZEBRAI2026"), "krepšinis")
+    isvestis = capsys.readouterr().out
+    assert "✅ Tomas — krepšinis" in isvestis
+    assert "Misijos būklė" not in isvestis
+
+
+def test_starterio_langelis_kviecia_misijos_bukle():
+    from pathlib import Path
+    assert "misijos_bukle()" in Path("turinys/06_mainai.py").read_text(encoding="utf-8")
+
+
+# ---- I3: likusios mokiniui rodomos šakos ----
+
+@pytest.mark.parametrize("blogas_vardas", [None, 17, "", "   "])
+def test_pradek_misija_be_vardo_nemeta_klaidos(capsys, blogas_vardas):
+    misija.pradek_misija(blogas_vardas, "ZEBRAI2026")
+    assert "Įrašyk savo vardą kabutėse" in capsys.readouterr().out
+    assert misija._mano_norm is None
+
+
+@pytest.mark.parametrize("blogas_kodas", [None, 2026, "", "   "])
+def test_pradek_misija_be_klases_kodo_nemeta_klaidos(capsys, blogas_kodas):
+    misija.pradek_misija("Birutė", blogas_kodas)
+    assert "Klasės kodas užrašytas ant lentos" in capsys.readouterr().out
+    assert misija._mano_norm is None
+
+
+@pytest.mark.parametrize("vardas, flagas", [
+    (None, "TOMA-0001"), ("Tomas", None), (17, 42), (["Tomas"], "TOMA-0001"),
+])
+def test_irasyk_flaga_ne_tekstiniai_argumentai_nemeta_klaidos(capsys, vardas, flagas):
+    _pradek()
+    misija.irasyk_flaga(vardas, flagas, "krepšinis")
+    assert "rašomi kabutėse" in capsys.readouterr().out
+    assert misija.surinkti() == []
+
+
+def test_irasyk_flaga_neflaguojamas_draugo_vardas(capsys):
+    _pradek()
+    misija.irasyk_flaga("Ą", "AA-0001", "krepšinis")
+    isvestis = capsys.readouterr().out
+    assert "flago sudaryti nepavyko" in isvestis
+    assert "Patikrink rašybą" in isvestis
+    assert misija.surinkti() == []
+
+
+def test_misijos_bukle_pries_pradek_misija_yra_zinute(capsys):
+    misija.misijos_bukle()
+    assert "pradek_misija" in capsys.readouterr().out
+
+
+def test_misijos_bukle_pasiekus_tiksla_svencia(capsys):
+    """Žinutė, kurią pamato KIEKVIENAS misiją baigęs mokinys."""
+    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=2)
+    for vardas, interesas in [("Tomas", "krepšinis"), ("Eglė", "šunys")]:
+        misija.irasyk_flaga(vardas, misija.generuok_flaga(vardas, "ZEBRAI2026"), interesas)
+    capsys.readouterr()
+    misija.misijos_bukle()
+    isvestis = capsys.readouterr().out
+    assert "2/2" in isvestis
+    assert "🎉 Misija įvykdyta!" in isvestis
+    assert "Liko pokalbių" not in isvestis
+
+
+def test_misijos_bukle_virs_tikslo_vis_dar_svencia(capsys):
+    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=1)
+    for vardas, interesas in [("Tomas", "krepšinis"), ("Eglė", "šunys")]:
+        misija.irasyk_flaga(vardas, misija.generuok_flaga(vardas, "ZEBRAI2026"), interesas)
+    capsys.readouterr()
+    misija.misijos_bukle()
+    assert "🎉 Misija įvykdyta!" in capsys.readouterr().out
+
+
+# Minor: ℹ be variacijos selektoriaus (U+FE0F) — šaltinyje nelieka nematomų
+# kodo taškų, kaip reikalauja projekto taisyklė.
+def test_saltinyje_nera_variacijos_selektoriu():
+    from pathlib import Path
+    assert "\ufe0f" not in Path("misija.py").read_text(encoding="utf-8")
+    assert "\ufe0f" not in Path("kortele.py").read_text(encoding="utf-8")
+

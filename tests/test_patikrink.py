@@ -189,3 +189,96 @@ def test_patikrink_be_erdve_naudoja_skambintojo_globalius(capsys):
     )
     israsyta = capsys.readouterr().out
     assert "✅" in israsyta
+
+
+# ---- Pranešimų padengimas (fix wave, C3 + I3) ----
+#
+# Šios šakos yra pamokos saugiklis: jos pakeičia traceback'ą lietuviška
+# užuomina. Iki šio etapo jos buvo pati mažiausiai testuota kodo dalis.
+
+def test_lygis1_praleidzia_tikra_jona_is_vilniaus(capsys):
+    """C3: „Jonas“ ir „Vilnius“ yra tikri, dažni duomenys.
+
+    Anksčiau bet kurio vieno lauko sutapimas blokavo 1 lygį, o kadangi 2 ir 3
+    lygiai eina per `_ivertink_1`, toks mokinys niekada nepraeidavo nė vieno
+    lygio — dar ir gaudamas melagingą žinutę, kad duomenų neįrašė.
+    """
+    erdve = _erdve_1(vardas="Jonas", miestas="Vilnius", faktas="turiu šunį")
+    _atvaizduok(erdve)
+    praejo, eilutes = kortele._ivertink(1, erdve)
+    assert praejo is True, "\n".join(eilutes)
+    assert any("✅" in e for e in eilutes)
+
+
+def test_lygis1_dalinis_sutapimas_duoda_neblokuojanti_priminima(capsys):
+    erdve = _erdve_1(vardas="Jonas", miestas="Vilnius", faktas="turiu šunį")
+    _atvaizduok(erdve)
+    praejo, eilutes = kortele._ivertink(1, erdve)
+    assert praejo is True
+    priminimas = [e for e in eilutes if "ℹ" in e]
+    assert len(priminimas) == 1
+    assert "`vardas`" in priminimas[0]
+    assert "`miestas`" in priminimas[0]
+    assert "`faktas`" not in priminimas[0]
+
+
+def test_lygis3_praeinamas_ir_tikram_jonui_is_vilniaus(capsys):
+    erdve = _erdve_1(vardas="Jonas", miestas="Vilnius", faktas="turiu šunį",
+                     pomegiai=["futbolas", "šachmatai"], slapyvardis="JON-34")
+    _atvaizduok(erdve, pomegiai=erdve["pomegiai"], slapyvardis=erdve["slapyvardis"])
+    praejo, eilutes = kortele._ivertink(3, erdve)
+    assert praejo is True, "\n".join(eilutes)
+
+
+def test_lygis1_visi_trys_laukai_nepakeisti_blokuoja(capsys):
+    erdve = _erdve_1(**{k: kortele.PLACEHOLDERS[k] for k in ("vardas", "miestas", "faktas")})
+    _atvaizduok(erdve)
+    praejo, eilutes = kortele._ivertink(1, erdve)
+    assert praejo is False
+    assert eilutes[0].startswith("✋")
+    assert "`vardas`" in eilutes[1] and "`miestas`" in eilutes[1] and "`faktas`" in eilutes[1]
+
+
+def test_lygis1_tuscias_laukas_duoda_savo_zinute(capsys):
+    erdve = _erdve_1(miestas="   ")
+    praejo, eilutes = kortele._ivertink(1, erdve)
+    assert praejo is False
+    assert any("tuščias" in e for e in eilutes)
+    assert any("`miestas`" in e for e in eilutes)
+
+
+# spec §9 reikalauja „kiekvienas lygis × nepaliestas placeholder'is“. 2 lygio
+# vietaženklio žinutė yra tai, ką pamatys KIEKVIENAS mokinys, pirmą kartą
+# paleidęs 2 lygio langelį — ir ji iki šiol neturėjo nė vieno testo.
+def test_lygis2_nepakeisti_jono_pomegiai_duoda_zinute(capsys):
+    erdve = _erdve_1(pomegiai=list(kortele.PLACEHOLDERS["pomegiai"]))
+    _atvaizduok(erdve, pomegiai=erdve["pomegiai"])
+    praejo, eilutes = kortele._ivertink(2, erdve)
+    assert praejo is False
+    assert any("Jono pomėgiai" in e for e in eilutes)
+
+
+def test_lygis2_nerandu_kintamojo(capsys):
+    erdve = _erdve_1()
+    _atvaizduok(erdve)
+    praejo, eilutes = kortele._ivertink(2, erdve)
+    assert praejo is False
+    assert any("Nerandu kintamojo `pomegiai`" in e for e in eilutes)
+
+
+def test_lygis3_nerandu_kintamojo(capsys):
+    erdve = _erdve_1(pomegiai=["futbolas", "šunys"])
+    _atvaizduok(erdve, pomegiai=erdve["pomegiai"])
+    praejo, eilutes = kortele._ivertink(3, erdve)
+    assert praejo is False
+    assert any("Nerandu kintamojo `slapyvardis`" in e for e in eilutes)
+
+
+@pytest.mark.parametrize("blogas", [42, None, "", "   "])
+def test_lygis3_blogas_slapyvardzio_tipas(blogas, capsys):
+    erdve = _erdve_1(pomegiai=["futbolas", "šunys"], slapyvardis=blogas)
+    _atvaizduok(erdve, pomegiai=erdve["pomegiai"])
+    praejo, eilutes = kortele._ivertink(3, erdve)
+    assert praejo is False
+    assert any("netuščias tekstas" in e for e in eilutes)
+

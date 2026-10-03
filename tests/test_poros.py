@@ -61,3 +61,105 @@ def test_lentele_html_turi_vardus_ir_yra_html():
     assert "ZEBRAI2026" in html
     for vardas in LYGINIS:
         assert vardas in html
+
+
+# ---- main(): mokytojo terminalo kelias ----
+#
+# C1: main() anksčiau krito su traceback'u keturiais numatomais atvejais, o
+# pavojingiausias — neflaguojamas vardas — atspausdindavo PILNĄ, teisingai
+# atrodančią trijų raundų lentelę ir tik tada nutrūkdavo, nepalikdamas
+# poros_lentele.html. Mokytojas, peržvelgęs terminalą, tokią lentelę
+# suprojektuotų, ir vienas mokinys niekada neužsiregistruotų.
+
+def _paleisk(tmp_path, vardai, *, raundai=3, kodas="ZEBRAI2026", klase=None):
+    if klase is None:
+        klase = tmp_path / "klase.txt"
+        klase.write_text("\n".join(vardai) + "\n", encoding="utf-8")
+    html = tmp_path / "poros_lentele.html"
+    kodas_grazinimo = poros.main([str(klase), "--kodas", kodas,
+                                  "--raundai", str(raundai), "--html", str(html)])
+    return kodas_grazinimo, html
+
+
+def test_main_sekmingas_kelias(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, LYGINIS)
+    isvestis = capsys.readouterr().out
+    assert kodas == 0
+    assert html.exists()
+    assert "1 RAUNDAS" in isvestis
+    assert "FLAGAI (tik mokytojui)" in isvestis
+    for vardas in LYGINIS:
+        assert vardas in isvestis
+
+
+def test_main_truksta_failo(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, [], klase=tmp_path / "nera.txt")
+    isvestis = capsys.readouterr().out
+    assert kodas == 1
+    assert "Nepavyko perskaityti failo" in isvestis
+    assert not html.exists()
+
+
+def test_main_tuscias_sarasas(tmp_path, capsys):
+    klase = tmp_path / "klase.txt"
+    klase.write_text("\n   \n\n", encoding="utf-8")
+    kodas, html = _paleisk(tmp_path, [], klase=klase)
+    isvestis = capsys.readouterr().out
+    assert kodas == 1
+    assert "Reikia bent dviejų" in isvestis
+    assert not html.exists()
+
+
+def test_main_vienas_vardas(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, ["Birutė"])
+    assert kodas == 1
+    assert "Reikia bent dviejų" in capsys.readouterr().out
+    assert not html.exists()
+
+
+def test_main_per_daug_raundu(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, ["Birutė", "Tomas", "Eglė"], raundai=3)
+    isvestis = capsys.readouterr().out
+    assert kodas == 1
+    assert "daugiausia 2 raundus" in isvestis
+    assert "RAUNDAS" not in isvestis
+    assert not html.exists()
+
+
+def test_main_nulis_raundu(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, LYGINIS, raundai=0)
+    assert kodas == 1
+    assert "turi būti bent 1" in capsys.readouterr().out
+    assert not html.exists()
+
+
+def test_main_kolizija_neiseveda_lenteles(tmp_path, capsys):
+    kodas, html = _paleisk(tmp_path, ["Lukas", "lukas ", "Eglė", "Tomas"])
+    isvestis = capsys.readouterr().out
+    assert kodas == 1
+    assert "sutampa po normalizavimo" in isvestis
+    assert "RAUNDAS" not in isvestis
+    assert not html.exists()
+
+
+def test_main_neflaguojamas_vardas_neiseveda_lenteles(tmp_path, capsys):
+    """Pavojingiausias C1 atvejis: lentelė atrodė visiškai teisinga."""
+    kodas, html = _paleisk(tmp_path, ["Birutė", "Tomas", "Eglė", "J."])
+    isvestis = capsys.readouterr().out
+    assert kodas == 1
+    assert "flago sudaryti neįmanoma" in isvestis
+    assert "J." in isvestis
+    assert "Pataisyk klase.txt" in isvestis
+    assert "RAUNDAS" not in isvestis
+    assert "FLAGAI" not in isvestis
+    assert not html.exists()
+
+
+@pytest.mark.parametrize("vardai, raundai", [
+    (["Birutė", "Tomas", "Eglė", "J."], 3),
+    (["Birutė"], 3),
+    (["Birutė", "Tomas", "Eglė"], 3),
+])
+def test_main_niekada_nemeta_traceback(tmp_path, vardai, raundai, capsys):
+    assert _paleisk(tmp_path, vardai, raundai=raundai)[0] == 1
+

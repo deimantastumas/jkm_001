@@ -119,6 +119,18 @@ Trumpai, kas kiekviename:
   (`tema="matrix"`). Čia teisingo atsakymo nėra — `patikrink(4)` visada
   tik aprašo, ką rado.
 
+**Kai mokinys įstrigo — ką paleisti pirmiausia:**
+
+- `patikrink(1)` / `patikrink(2)` / `patikrink(3)` — pasako, kurio kintamojo
+  trūksta arba kuris dar neperduotas kortelei.
+- `misijos_bukle()` — parodo, ar mokinys apskritai užsiregistravo
+  (`pradek_misija`), kiek flagų jau surinkta ir su kuo. Jei ji sako
+  „Pirmiausia paleisk langelį su pradek_misija(...)“ — visa misijos dalis jam
+  dar neveikia, ir tai svarbiausia pataisyti.
+- Tavo paties flagų sąrašas iš `poros.py` — greičiausias būdas patikrinti, ar
+  mokinys tikrai užsiregistravo ta vardo rašyba, kuri yra lentelėje: palygink
+  jo ekrane rodomą flagą su sąraše esančiu.
+
 ## 5. Dažniausios klaidos
 
 | Klaida | Neteisingai | Teisingai | Vienas sakinys mokiniui |
@@ -127,6 +139,7 @@ Trumpai, kas kiekviename:
 | „Protingos“ kabutės iš pokalbių programos | `vardas = „Birutė“` | `vardas = "Birutė"` | Nekopijuok teksto iš Messenger/WhatsApp — jos įterpia riestas kabutes, kurių Python nesupranta; rašyk tiesiai Jupyter langelyje. |
 | Lietuviškos raidės kintamojo varde | `pomėgiai = [...]` | `pomegiai = [...]` | Kintamųjų varduose nenaudojame lietuviškų raidžių (ą, č, ė...) — tik `pomegiai`, be „ė“. |
 | Trūksta kablelio sąraše | `["futbolas" "šunys"]` | `["futbolas", "šunys"]` | Tarp sąrašo elementų visada reikia kablelio, kitaip Python juos sulipdo į vieną žodį. |
+| `NameError: name 'pomegiai' is not defined` | Paleistas 3 lygio langelis praleidus 2 lygį | Pirma paleisti 1 ir 2 lygio langelius | Paleidai langelį praleidęs ankstesnį — grįžk ir paleisk 1 ir 2 lygio langelius iš eilės. |
 
 ## 6. Misijos logistika
 
@@ -141,6 +154,11 @@ Trumpai, kas kiekviename:
 - Jei kas nors baigė 1 iššūkį vėliau ir praleido raundą — `irasyk_flaga`
   priima bet kurį klasės draugą, ne tik lentelėje nurodytą, tad jis tiesiog
   prisijungia prie laisvo žmogaus.
+- **Toje pačioje `pradek_misija(...)` eilutėje reikia pakeisti ir klasės
+  kodą** — langelis atkeliauja su `"KLASES-KODAS"` vietoj tikro kodo. Kol jis
+  nepakeistas, langelis atsako `✋ Čia dar pavyzdiniai duomenys` ir misijos
+  nepradeda. Pasakyk tai garsiai, kai rodai misijos langelį: keičiami **du**
+  dalykai vienoje eilutėje — vardas ir kodas.
 - **Svarbu:** kiekvienas mokinys turi registruotis `pradek_misija(...)`
   **lygiai tokia pačia savo vardo rašyba, kokia parašyta projektuojamoje
   porų lentelėje** — flagas skaičiuojamas iš vardo, tad kitokia forma duos
@@ -162,6 +180,20 @@ Palauk atsakymo. Jei kas nors prisipažins (pvz. atspėjo flagą, pažiūrėjo �
 kito ekraną, ar susigalvojo savo sprendimą) — **viešai pagirk** tą mokinį,
 nesvarbu, kad tai „apgaulė“: jis ką tik įrodė esmę, kurią ir norime
 parodyti.
+
+**Jei neprisipažįsta niekas** — parodyk pats. Atsiversk notebooką savo
+ekrane, naujame langelyje paleisk (`Tomas` pakeisk tikru klasės mokinio
+vardu iš porų lentelės):
+
+```python
+import misija
+misija.generuok_flaga("Tomas", misija._klases_kodas)
+```
+
+ir pasakyk: **„štai Tomo flagas, ir aš su juo nekalbėjau“**. `_klases_kodas`
+yra tas pats kodas, kurį įrašei savo `pradek_misija(...)` langelyje, tad
+rezultatas sutaps su tuo, kas rodoma Tomo ekrane — patikrink garsiai, paklausęs
+Tomo. Tai ta pati demonstracija, tik be savanorio.
 
 Tada paaiškink (arba leisk tam mokiniui paaiškinti, jei jis jau susigaudė):
 

@@ -55,8 +55,12 @@ used regardless of whether the venv is activated.
 
 `poros.py` prints a projectable round-robin pairing table and the teacher's
 reference list of every pupil's flag to the terminal, and writes a
-standalone `poros_lentele.html` for projecting. It refuses to print
-anything if two names collide after normalisation (same flag would result).
+standalone `poros_lentele.html` for projecting. Every foreseeable roster
+problem is checked *before* the first line is printed — missing file, fewer
+than two names, more rounds than pairings allow, names that collide after
+normalisation (same flag would result), and names no flag can be derived
+from — each refusing with a Lithuanian message and exit code 1 rather than
+a traceback over a half-printed table.
 
 ## File map
 
@@ -106,12 +110,14 @@ import):
 **Tests** (`tests/`, run with `./.venv/bin/python -m pytest`):
 - `test_rodyk_kortele.py`, `test_misija.py`, `test_patikrink.py` — engine
   behaviour, including that malformed input never raises.
-- `test_poros.py` — pairing correctness and the name-collision guard.
-- `test_build.py` — the generated notebook is valid and every starter
-  snippet compiles; each `sprendimas_N()` is executed and its result is
-  checked against `patikrink(N, ...)`, so a broken reference solution fails
-  CI rather than the classroom.
-- `test_sprendimai.py` — the reference solutions themselves.
+- `test_poros.py` — pairing correctness, the name-collision guard, and
+  every refusal path in `main()`.
+- `test_build.py` — the generated notebook is valid, every starter snippet
+  compiles, every `@@token@@` resolves to its engine value, and the committed
+  `intro_kortele.ipynb` matches what `build.py` would generate right now.
+- `test_sprendimai.py` — the reference solutions: each `sprendimas_N()` is
+  executed and the namespace it returns is checked against `patikrink(N,
+  ...)`, so a broken reference solution fails CI rather than the classroom.
 
 ## Never commit
 

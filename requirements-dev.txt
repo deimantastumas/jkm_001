@@ -1,0 +1,8 @@
+# Resolved versions (2026-10-03):
+# jupyterlite-core==0.8.5
+# jupyterlite-pyodide-kernel==0.8.6
+# pytest==9.1.1
+
+jupyterlite-core>=0.4
+jupyterlite-pyodide-kernel>=0.4
+pytest>=8

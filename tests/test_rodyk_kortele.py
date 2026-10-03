@@ -108,6 +108,30 @@ def test_pomegiai_ne_sarasas_duoda_zinute(capsys):
     assert "pomegiai" in capsys.readouterr().out
 
 
+# bendri_interesai is not taught, but level 4 sends pupils hunting through
+# kortele.py's source for undocumented keyword arguments — it sits right
+# next to tema= in the signature, so a malformed value here must also
+# print a hint rather than raise.
+def test_bendri_interesai_tekstas_duoda_zinute(capsys):
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas", bendri_interesai="krepšinis")
+    assert "bendri_interesai" in capsys.readouterr().out
+    assert kortele._paskutine_kortele is None
+
+
+def test_bendri_interesai_sarasas_tekstu_duoda_zinute(capsys):
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas",
+                          bendri_interesai=["Tomas", "krepšinis"])
+    assert "bendri_interesai" in capsys.readouterr().out
+    assert kortele._paskutine_kortele is None
+
+
+def test_bendri_interesai_netinkamo_ilgio_poros_duoda_zinute(capsys):
+    kortele.rodyk_kortele("Birutė", 16, "Vilnius", "faktas",
+                          bendri_interesai=[("Tomas", "krepšinis", "papildomai")])
+    assert "bendri_interesai" in capsys.readouterr().out
+    assert kortele._paskutine_kortele is None
+
+
 def test_bloga_ivestis_nepalieka_paskutines_korteles(capsys):
     kortele.rodyk_kortele("Birutė", "16", "Vilnius", "faktas")
     assert kortele._paskutine_kortele is None

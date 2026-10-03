@@ -80,7 +80,14 @@ def _atstatyk():
     _paskutine_kortele = None
 
 
-def _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema):
+def _tinkama_interesu_pora(elementas):
+    """Ar elementas yra (vardas, interesas) pora iš dviejų tekstų."""
+    return (isinstance(elementas, (tuple, list)) and len(elementas) == 2
+            and isinstance(elementas[0], str) and isinstance(elementas[1], str))
+
+
+def _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema,
+                       bendri_interesai):
     """Grąžina lietuvišką žinutę apie pirmą rastą klaidą arba None."""
     for pavadinimas, reiksme in (("vardas", vardas), ("miestas", miestas), ("faktas", faktas)):
         if not isinstance(reiksme, str) or not reiksme.strip():
@@ -96,6 +103,11 @@ def _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, te
     if not isinstance(tema, str) or tema not in _TEMOS:
         return (f'❗ `tema` turi būti viena iš: ' + ", ".join(_TEMOS) +
                 f'. Tu parašei „{tema}“.')
+    if bendri_interesai is not None and (
+            not isinstance(bendri_interesai, (list, tuple))
+            or not all(_tinkama_interesu_pora(p) for p in bendri_interesai)):
+        return ('❗ `bendri_interesai` turi būti sąrašas porų (vardas, interesas), pvz. '
+                'bendri_interesai = [("Tomas", "krepšinis")].')
     return None
 
 
@@ -114,7 +126,8 @@ def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
     """Atspausdina asmeninę kortelę."""
     global _paskutine_kortele
 
-    klaida = _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema)
+    klaida = _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema,
+                                bendri_interesai)
     if klaida:
         print(klaida)
         return

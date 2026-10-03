@@ -100,3 +100,72 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
     print(f"   Sakyk draugams:  {_mano_vardas}")
     print(f"   Tikslas:         {tikslas} pokalbiai")
     print("   Po kiekvieno pokalbio užpildyk ir paleisk kitą langelį.")
+
+
+def irasyk_flaga(vardas, flagas, bendras_interesas):
+    """Patikrina draugo flagą ir įrašo jūsų bendrą interesą."""
+    if _mano_norm is None:
+        print("❗ Pirmiausia paleisk langelį su pradek_misija(...).")
+        return
+
+    if not isinstance(vardas, str) or not isinstance(flagas, str):
+        print('❗ Vardas ir flagas rašomi kabutėse, pvz. irasyk_flaga("Tomas", "TOMA-4417", "krepšinis").')
+        return
+
+    pavyzdinis_vardas, pavyzdinis_flagas, _ = PAVYZDYS
+    if (normalizuok(vardas) == normalizuok(pavyzdinis_vardas)
+            and flagas.strip().upper() == pavyzdinis_flagas):
+        print("👀 Čia pavyzdys — įrašyk tikro draugo vardą, jo flagą ir jūsų bendrą interesą.")
+        return
+
+    if not isinstance(bendras_interesas, str) or not bendras_interesas.strip():
+        print("❗ Įrašyk, koks jūsų bendras interesas — be to flagas neužskaitomas.")
+        return
+
+    svetimas_norm = normalizuok(vardas)
+    if svetimas_norm == _mano_norm:
+        print("🙃 Savo paties flago įrašyti negalima. Eik pas tą žmogų, kuris nurodytas lentoje.")
+        return
+
+    if any(d["norm"] == svetimas_norm for d in _draugai):
+        print(f"ℹ️ Su {vardas} jau apsikeitėte. Eik pas kitą!")
+        return
+
+    try:
+        laukiamas = generuok_flaga(vardas, _klases_kodas)
+    except VardoKlaida:
+        print(f"❗ Iš vardo „{vardas}“ flago sudaryti nepavyko. Patikrink rašybą.")
+        return
+
+    if flagas.strip().upper() != laukiamas:
+        print(f"❌ Flagas netinka. Patikrink: ar gerai nurašei vardą „{vardas}“ ir jo flagą?")
+        print(f"   Jo flagas turėtų prasidėti „{laukiamas.split('-')[0]}-“.")
+        return
+
+    _draugai.append({
+        "vardas": vardas.strip(),
+        "norm": svetimas_norm,
+        "interesas": bendras_interesas.strip(),
+    })
+    print(f"✅ {vardas.strip()} — {bendras_interesas.strip()}")
+    misijos_bukle()
+
+
+def surinkti():
+    """Grąžina [(vardas, bendras interesas), ...] įrašymo tvarka."""
+    return [(d["vardas"], d["interesas"]) for d in _draugai]
+
+
+def misijos_bukle():
+    """Parodo, kiek pokalbių jau įskaityta."""
+    if _mano_norm is None:
+        print("❗ Pirmiausia paleisk langelį su pradek_misija(...).")
+        return
+    print(f"📋 Misijos būklė: {len(_draugai)}/{_tikslas}")
+    for draugas in _draugai:
+        print(f"   ✅ {draugas['vardas']} – {draugas['interesas']}")
+    truksta = _tikslas - len(_draugai)
+    if truksta > 0:
+        print(f"   Liko pokalbių: {truksta}")
+    else:
+        print("   🎉 Misija įvykdyta!")

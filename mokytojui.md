@@ -140,6 +140,7 @@ Trumpai, kas kiekviename:
 | Lietuviškos raidės kintamojo varde | `pomėgiai = [...]` | `pomegiai = [...]` | Kintamųjų varduose nenaudojame lietuviškų raidžių (ą, č, ė...) — tik `pomegiai`, be „ė“. |
 | Trūksta kablelio sąraše | `["futbolas" "šunys"]` | `["futbolas", "šunys"]` | Tarp sąrašo elementų visada reikia kablelio, kitaip Python juos sulipdo į vieną žodį. |
 | `NameError: name 'pomegiai' is not defined` | Paleistas 3 lygio langelis praleidus 2 lygį | Pirma paleisti 1 ir 2 lygio langelius | Paleidai langelį praleidęs ankstesnį — grįžk ir paleisk 1 ir 2 lygio langelius iš eilės. |
+| `NameError` po puslapio perkrovimo, nors langeliai atrodo paleisti | JupyterLite perkrovus puslapį paleidžia naują branduolį, bet senieji rezultatai lieka matomi — atrodo, lyg viskas būtų įvykdyta | Paleisti langelius iš naujo nuo 1 lygio | Perkrovei puslapį — Python pradėjo iš naujo, nors senieji atsakymai dar matomi. Paleisk langelius iš eilės nuo 1 lygio. |
 
 ## 6. Misijos logistika
 

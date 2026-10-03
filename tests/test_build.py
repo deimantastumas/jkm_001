@@ -113,3 +113,58 @@ def test_irasyk_notebooka_sukuria_faila(tmp_path):
     kelias = build.irasyk_notebooka(tmp_path / "test.ipynb")
     duomenys = json.loads(kelias.read_text(encoding="utf-8"))
     assert duomenys["cells"]
+
+
+# --- Kiekvienas langelis turi pats importuoti tai, ką naudoja --------------
+#
+# JupyterLite branduolys atsistato perkrovus puslapį, o senieji langelių
+# rezultatai lieka matomi — mokiniui atrodo, kad importas jau įvykdytas.
+# Jei importas būtų tik pirmame langelyje, bet kuris praleistas ar
+# perkrautas seansas duotų `NameError: name 'rodyk_kortele' is not defined`.
+
+VARIKLIO_FUNKCIJOS = {
+    "rodyk_kortele": "kortele",
+    "patikrink": "kortele",
+    "pradek_misija": "misija",
+    "irasyk_flaga": "misija",
+    "misijos_bukle": "misija",
+}
+
+
+def _kodo_langeliai(nb):
+    return [c for c in nb["cells"] if c["cell_type"] == "code"]
+
+
+@pytest.mark.parametrize("funkcija,modulis", sorted(VARIKLIO_FUNKCIJOS.items()))
+def test_kiekvienas_langelis_importuoja_ka_naudoja(nb, funkcija, modulis):
+    for cele in _kodo_langeliai(nb):
+        kodas = "".join(cele["source"])
+        if f"{funkcija}(" not in kodas:
+            continue
+        importas = f"from {modulis} import"
+        assert importas in kodas, (
+            f"{cele['id']} kviečia {funkcija}(), bet neimportuoja jos. "
+            f"Mokinys, paleidęs tik šį langelį, gaus NameError."
+        )
+        eilute = next(e for e in kodas.splitlines() if e.startswith(importas))
+        assert funkcija in eilute, (
+            f"{cele['id']} importuoja iš {modulis}, bet ne {funkcija}."
+        )
+
+
+def test_langelis_veikia_be_ankstesniu_importu(nb):
+    """Pirmas kiekvieno iššūkio langelis turi veikti švariame branduolyje."""
+    import pathlib
+    import subprocess
+    import sys
+
+    langeliai = _kodo_langeliai(nb)
+    kodas = "".join(langeliai[1]["source"])  # 1 lygis, be jokio ankstesnio langelio
+    rezultatas = subprocess.run(
+        [sys.executable, "-c", kodas],
+        cwd=pathlib.Path(__file__).resolve().parent.parent,
+        capture_output=True,
+        text=True,
+    )
+    assert rezultatas.returncode == 0, rezultatas.stderr
+    assert "NameError" not in rezultatas.stderr

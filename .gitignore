@@ -4,3 +4,5 @@ __pycache__/
 .pytest_cache/
 klase.txt
 poros_*.html
+.venv/
+.superpowers/

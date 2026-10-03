@@ -11,7 +11,7 @@ hobbies list → derived nickname → free-form extension).
 **Challenge 2 — Flagų misija:** pupils are sent to named classmates, must
 find a shared interest, and exchange derived "flags"; collected interests
 land back on the card, which pupils read aloud at the end. The lesson
-closes with a five-minute security debrief: the card-checking mechanism
+closes with a five-minute security debrief: the flag-checking mechanism
 doubles as a lesson in why client-side secrets aren't secrets.
 
 The teacher-facing guide, in Lithuanian, is [`mokytojui.md`](mokytojui.md) —

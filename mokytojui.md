@@ -11,7 +11,7 @@ pamoką ir dar kartą — stovint prieš klasę.
 1. Sukurk GitHub repozitoriją ir į ją `push` šio projekto `main` šaką.
 2. Repozitorijos `Settings → Pages → Build and deployment → Source` nustatyk
    **„GitHub Actions“** (ne „Deploy from a branch“).
-3. Palauk, kol repo `Actions` skiltyje `deploy` workflow baigs veikti (žalias
+3. Palauk, kol repo `Actions` skiltyje `deploy` workflow baigs veikti (žalia
    varnelė).
 4. Atsidaręs `Settings → Pages` pamatysi gyvą adresą — jis atrodys panašiai
    į `https://<vartotojas>.github.io/<repo>/`.
@@ -32,7 +32,9 @@ Pagrindinė nuoroda (atverti JupyterLite notebooką):
 filtras blokuoja):
 
 1. Nukopijuok `dist/` aplanką į USB raktą arba tiesiai į mokytojo
-   kompiuterį (jis jau sugeneruotas — žr. „Prieš pamoką“).
+   kompiuterį. `dist/` nėra įkeltas į git (jis sugeneruojamas iš naujo
+   kiekvieną kartą) — jį pasiruoši §2 „Prieš pamoką“ sąraše žemiau, pirmame
+   punkte, prieš pamoką.
 2. Iš `001/` aplanko paleisk:
    ```
    ./.venv/bin/python -m http.server 8000 --directory dist
@@ -49,6 +51,12 @@ neveiks. **Išbandyk jį iš anksto**, ne pamokos metu.
 Visa tai daryk **iš mokyklos tinklo**, ne iš namų — namie viskas atrodo
 veikiantis, bet mokyklos wifi ir filtrai gali elgtis kitaip.
 
+- [ ] Pasiruošk atsarginį variantą be interneto: paleisk
+      `./.venv/bin/python build.py`, patikrink, ar `dist/` aplankas
+      atsirado/atsinaujino, ir nukopijuok jį į USB raktą arba mokytojo
+      kompiuterį (žr. §1). Tai daryk **net jei** planuoji naudoti tik
+      `<PAGES-URL>` — tai tavo saugiklis, jei wifi ar filtras pamokos metu
+      pakiš koją.
 - [ ] Atsiversk `<PAGES-URL>` telefonu per mokyklos wifi. Palauk, kol
       Pyodide pilnai įsikels (pirmas kartas gali užtrukti 20-40 s), ir
       paleisk bent vieną langelį — jis turi grąžinti rezultatą be klaidų.
@@ -167,8 +175,8 @@ Tada paaiškink (arba leisk tam mokiniui paaiškinti, jei jis jau susigaudė):
 > paslėptas — jis tiesiog yra jūsų kompiuteryje.
 >
 > Štai kodėl **niekas, kas siunčiama į naršyklę, nėra paslaptis.** Viskas,
-> ką naršyklė gauna — HTML, JavaScript, Python kodas — mokamas žmogus su
-> laiku gali perskaityti ir atkartoti.
+> ką naršyklė gauna — HTML, JavaScript, Python kodas — bet kuris pakankamai
+> atkaklus žmogus gali perskaityti ir atkartoti.
 >
 > Būtent dėl to tikros sistemos (banko programėlė, el. paštas, žaidimų
 > paskyra) **niekada netikrina slaptažodžio naršyklėje** — jos jį siunčia

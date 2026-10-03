@@ -260,14 +260,14 @@ def _ivertink_4(erdve):
             a = funkcija("Testas", 15)
             b = funkcija("Kitas", 17)
         except Exception:
-            eilutes.append("   ⚠️ `slapyvardis_is` yra, bet su mano duomenimis nesuveikė.")
+            eilutes.append("   ⚠ `slapyvardis_is` yra, bet su mano duomenimis nesuveikė.")
         else:
             if isinstance(a, str) and isinstance(b, str) and a.strip() and a != b:
                 eilutes.append(f"   ✅ `slapyvardis_is` veikia: Testas → {a}, Kitas → {b}")
             else:
-                eilutes.append("   ⚠️ `slapyvardis_is` grąžina tą patį visiems — pasinaudok argumentais.")
+                eilutes.append("   ⚠ `slapyvardis_is` grąžina tą patį visiems — pasinaudok argumentais.")
     elif funkcija is not None:
-        eilutes.append("   ⚠️ `slapyvardis_is` yra, bet tai ne funkcija.")
+        eilutes.append("   ⚠ `slapyvardis_is` yra, bet tai ne funkcija.")
 
     if "random" in erdve:
         eilutes.append("   ✅ Naudoji `random` — atsitiktinumas įjungtas.")

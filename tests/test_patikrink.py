@@ -93,7 +93,10 @@ def test_lygis2_per_mazai_pomegiu(capsys):
 
 def test_lygis2_ne_sarasas(capsys):
     erdve = _erdve_1(pomegiai="futbolas")
-    assert kortele._ivertink(2, erdve)[0] is False
+    _atvaizduok(erdve)
+    praejo, eilutes = kortele._ivertink(2, erdve)
+    assert praejo is False
+    assert any("sąrašas" in e for e in eilutes)
 
 
 # ---- Lygis 3 ----
@@ -134,6 +137,20 @@ def test_lygis4_niekada_nepranesa_klaidos(erdve):
 def test_lygis4_atpazista_veikiancia_funkcija():
     erdve = {"slapyvardis_is": lambda v, a: f"{v[:3].upper()}-{a}"}
     _, eilutes = kortele._ivertink(4, erdve)
+    assert any("slapyvardis_is" in e for e in eilutes)
+
+
+# Not from the brief: slapyvardis_is is exactly the kind of thing confident
+# pupils write themselves at level 4, and a function that raises is a
+# realistic input, not a hypothetical. Pins that the try/except in
+# _ivertink_4 actually survives it.
+def test_lygis4_funkcija_kuri_meta_klaida_nelunka():
+    def blogas_slapyvardis(vardas, amzius):
+        raise ValueError("kažkas negerai")
+
+    erdve = {"slapyvardis_is": blogas_slapyvardis}
+    praejo, eilutes = kortele._ivertink(4, erdve)
+    assert praejo is True
     assert any("slapyvardis_is" in e for e in eilutes)
 
 

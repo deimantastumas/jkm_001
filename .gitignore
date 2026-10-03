@@ -7,3 +7,4 @@ poros_*.html
 .venv/
 .superpowers/
 .jupyterlite.doit.db
+.coverage

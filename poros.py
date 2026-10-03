@@ -100,7 +100,30 @@ def main(argv=None):
     parseris.add_argument("--html", default="poros_lentele.html")
     args = parseris.parse_args(argv)
 
-    vardai = _skaityk_vardus(args.klase)
+    # Viskas, kas gali nepavykti, patikrinama PRIEŠ pirmą spausdinimą: mokytojas,
+    # pamatęs pusę teisingai atrodančios lentelės, ją suprojektuotų, o scenarijus
+    # tuo metu jau būtų nutrūkęs ir poros_lentele.html liktų nesukurtas.
+    try:
+        vardai = _skaityk_vardus(args.klase)
+    except OSError as klaida:
+        print(f"❌ Nepavyko perskaityti failo „{args.klase}“: {klaida.strerror}.")
+        print("   Sukurk jį ir surašyk vardus po vieną eilutėje.")
+        return 1
+
+    if len(vardai) < 2:
+        print(f"❌ Faile „{args.klase}“ radau vardų: {len(vardai)}. Reikia bent dviejų.")
+        print("   Surašyk klasės vardus po vieną eilutėje ir paleisk iš naujo.")
+        return 1
+
+    if args.raundai < 1:
+        print(f"❌ --raundai turi būti bent 1, o nurodyta {args.raundai}.")
+        return 1
+
+    if args.raundai > len(vardai) - 1:
+        print(f"❌ Su {len(vardai)} dalyviais be pasikartojimų galima daugiausia "
+              f"{len(vardai) - 1} raundus, o nurodyta {args.raundai}.")
+        print("   Sumažink --raundai arba papildyk klase.txt.")
+        return 1
 
     bedos = kolizijos(vardai)
     if bedos:
@@ -110,13 +133,27 @@ def main(argv=None):
         print("   Pataisyk klase.txt (pvz. „Lukas B.“) ir paleisk iš naujo.")
         return 1
 
+    flagai = []
+    beflagiai = []
+    for vardas in sorted(vardai):
+        try:
+            flagai.append((vardas, misija.generuok_flaga(vardas, args.kodas)))
+        except misija.VardoKlaida:
+            beflagiai.append(vardas)
+    if beflagiai:
+        print("❌ Iš šių vardų flago sudaryti neįmanoma (per mažai lotyniškų raidžių):")
+        for vardas in beflagiai:
+            print(f"   {vardas}")
+        print("   Pataisyk klase.txt (pvz. „Lukas B.“) ir paleisk iš naujo.")
+        return 1
+
     raundai_sarasas = sudaryk(vardai, args.raundai)
 
     print(f"Klasės kodas: {args.kodas}")
     print(lentele_tekstu(raundai_sarasas))
     print("\n=== FLAGAI (tik mokytojui) ===")
-    for vardas in sorted(vardai):
-        print(f"   {vardas:<20} {misija.generuok_flaga(vardas, args.kodas)}")
+    for vardas, flagas in flagai:
+        print(f"   {vardas:<20} {flagas}")
 
     Path(args.html).write_text(lentele_html(raundai_sarasas, args.kodas), encoding="utf-8")
     print(f"\n📺 Projektuoti: {args.html}")

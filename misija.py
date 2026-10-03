@@ -1,8 +1,11 @@
 """Flagų misija — antroji 001 pamokos užduotis.
 
 Flagas išvedamas iš vardo ir klasės kodo, todėl niekur nereikia saugoti
-mokinių sąrašo. Visos viešos funkcijos spausdina lietuviškas žinutes ir
-niekada nemeta klaidų.
+mokinių sąrašo. Visos mokiniui skirtos funkcijos (`pradek_misija`,
+`irasyk_flaga`, `misijos_bukle`) spausdina lietuviškas žinutes ir niekada
+nemeta klaidų. `generuok_flaga` yra vidinė santechnika — ją naudoja šis
+modulis ir mokytojo `poros.py`, ir ji meta `VardoKlaida`, kai iš vardo
+flago sudaryti neįmanoma; kviečiantysis privalo tą klaidą pagauti.
 """
 
 import hashlib
@@ -51,6 +54,26 @@ def generuok_flaga(vardas, klases_kodas):
 
 PAVYZDYS = ("Vardenis", "VARD-0000", "krepšinis")
 
+# Klasės kodo vietaženklis, kuris atkeliauja į `turinys/05_misija.py` per
+# build.py žymeklį @@pavyzdys_kodas@@. Tikras kodas visada ateina nuo lentos,
+# tad lygybė su šiuo tekstu reiškia, kad langelis dar nepataisytas.
+PLACEHOLDER_KODAS = "KLASES-KODAS"
+
+
+def _vardo_vietazenklis():
+    """Vardo vietaženklis iš kortele.py arba None, jei to modulio nėra.
+
+    Importas tingus ir apsaugotas: `kortele` priklauso nuo `misija` (tingiu
+    importu funkcijos viduje), tad modulio lygmens importas čia uždarytų ratą,
+    o `misija.py` turi likti paleidžiamas ir vienas.
+    """
+    try:
+        import kortele
+    except ImportError:
+        return None
+    return kortele.PLACEHOLDERS.get("vardas")
+
+
 _mano_vardas = None
 _mano_norm = None
 _klases_kodas = None
@@ -82,6 +105,24 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
         print("❗ tikslas turi būti teigiamas skaičius be kabučių, pvz. tikslas=3.")
         return
 
+    # Nepataisytas langelis: klasės kodas yra vienintelis vienareikšmis ženklas —
+    # tikras kodas visada ateina nuo lentos, tad niekas jo taip nepavadins.
+    # Registruoti negalima: tokiu atveju mokinys gautų svetimą flagą ir visus
+    # tris raundus klaidingai kaltintų draugus.
+    if _normalizuok_koda(klases_kodas) == PLACEHOLDER_KODAS:
+        print("✋ Čia dar pavyzdiniai duomenys — misija nepradėta.")
+        print("   Įrašyk savo vardą (tokį, koks parašytas porų lentelėje) ir klasės")
+        print('   kodą nuo lentos, pvz. pradek_misija("Birutė", "ZEBRAI2026").')
+        return
+
+    # Vardas, priešingai, dviprasmis: „Jonas“ yra ir vietaženklis, ir labai
+    # dažnas tikras vardas. Blokuoti tikrą Joną reikštų visai neįleisti jo į
+    # antrą pamokos dalį, tad čia tik priminimas — registracija vyksta.
+    vardo_vietazenklis = _vardo_vietazenklis()
+    if vardo_vietazenklis and normalizuok(vardas) == normalizuok(vardo_vietazenklis):
+        print(f"✋ Vardas vis dar „{vardo_vietazenklis}“ — jei tai ne tavo vardas,")
+        print("   pakeisk jį savo ir paleisk langelį iš naujo.")
+
     try:
         flagas = generuok_flaga(vardas, klases_kodas)
     except VardoKlaida:
@@ -91,6 +132,12 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
 
     naujas_norm = normalizuok(vardas)
     if naujas_norm != _mano_norm:
+        # Vardo pataisymas yra būtent tai, ko vadove prašoma iš mokinio, kurio
+        # rašyba nesutampa su lentele — tad tylus surinktų flagų ištrynimas
+        # nutiktų blogiausiu įmanomu momentu. Ištrinam, bet pasakom.
+        if _draugai:
+            print("⚠ Pakeitei vardą, tad anksčiau surinkti flagai nebegalioja —"
+                  " jie buvo susieti su ankstesne rašyba.")
         _draugai = []
 
     _mano_vardas = vardas.strip()
@@ -131,7 +178,7 @@ def irasyk_flaga(vardas, flagas, bendras_interesas):
         return
 
     if any(d["norm"] == svetimas_norm for d in _draugai):
-        print(f"ℹ️ Su {vardas} jau apsikeitėte. Eik pas kitą!")
+        print(f"ℹ Su {vardas} jau apsikeitėte. Eik pas kitą!")
         return
 
     try:
@@ -143,6 +190,8 @@ def irasyk_flaga(vardas, flagas, bendras_interesas):
     if flagas.strip().upper() != laukiamas:
         print(f"❌ Flagas netinka. Patikrink: ar gerai nurašei vardą „{vardas}“ ir jo flagą?")
         print(f"   Jo flagas turėtų prasidėti „{laukiamas.split('-')[0]}-“.")
+        print("   Jei visi flagai netinka — patikrink savo pradek_misija(...)"
+              " eilutę: vardą ir klasės kodą.")
         return
 
     _draugai.append({
@@ -151,7 +200,6 @@ def irasyk_flaga(vardas, flagas, bendras_interesas):
         "interesas": bendras_interesas.strip(),
     })
     print(f"✅ {vardas.strip()} — {bendras_interesas.strip()}")
-    misijos_bukle()
 
 
 def surinkti():

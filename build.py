@@ -35,6 +35,7 @@ def _pakeitimai():
         "@@pavyzdys_vardas@@": pav_vardas,
         "@@pavyzdys_flagas@@": pav_flagas,
         "@@pavyzdys_interesas@@": pav_interesas,
+        "@@pavyzdys_kodas@@": misija.PLACEHOLDER_KODAS,
     }
 
 

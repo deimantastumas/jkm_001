@@ -158,7 +158,10 @@ def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
         eilutes.append(skirtukas)
         eilutes.append(_eilute("  Bendri interesai:", t))
         for draugas, interesas in interesai:
-            eilutes.append(_eilute(f"    su {draugas} – {interesas}", t))
+            # Be „su“: taisyklinga lietuvių kalba reikalautų įnagininko („su
+            # Tomu“), o linksniavimas yra už šios pamokos ribų. Vardas
+            # vardininku be prielinksnio skamba teisingai.
+            eilutes.append(_eilute(f"    {draugas} – {interesas}", t))
 
     eilutes.append(apacia)
     print("\n".join(eilutes))
@@ -195,19 +198,35 @@ def _ivertink_1(erdve):
 
     # amzius sąmoningai neįtrauktas: jo placeholder'is (16) yra įprastas tikras
     # šios auditorijos amžius, tad lygybė su juo nieko nesako apie tai, ar
-    # mokinys įvedė savo duomenis. vardas/miestas/faktas placeholder'iai
-    # ("Jonas"/"Vilnius"/"moku groti gitara") tokios dviprasmybės neturi.
+    # mokinys įvedė savo duomenis.
+    #
+    # Tas pats dviprasmiškumas galioja ir atskiriems teksto laukams: „Jonas“
+    # yra vienas dažniausių lietuviškų vardų, o Vilniuje gyvena maždaug
+    # trečdalis šalies mokinių. Tad vieno lauko sutapimo neužtenka — blokavus
+    # jį, tikras Jonas iš Vilniaus niekada nepraeitų nė vieno lygio (2 ir 3
+    # lygiai eina per šį patikrinimą), ir dar būtų kaltinamas tuo, ko nepadarė.
+    # Blokuojame tik tada, kai NEPAKEISTI VISI TRYS — o kadangi „moku groti
+    # gitara“ niekas neparašo atsitiktinai, nepaliestas langelis vis tiek
+    # pagaunamas kiekvieną kartą. Dalinis sutapimas duoda neblokuojantį
+    # priminimą, tad ir Jono miestą nešiojantis mokinys informaciją gauna.
     teksto_laukai = ("vardas", "miestas", "faktas")
     nepakeisti = [p for p in teksto_laukai if erdve[p] == PLACEHOLDERS[p]]
-    if nepakeisti:
+    if len(nepakeisti) == len(teksto_laukai):
         eilutes.append("✋ Kortelė veikia! Dabar įrašyk savo duomenis 🙂")
         eilutes.append("   Dar nepakeisti: " + ", ".join(f"`{p}`" for p in nepakeisti))
         return False, eilutes
 
-    if _paskutine_kortele is None:
-        return False, ["❌ Dar neatvaizdavai kortelės — paleisk `rodyk_kortele(...)` eilutę."]
+    if nepakeisti:
+        eilutes.append("ℹ Sutampa su pavyzdžiu: "
+                       + ", ".join(f"`{p}`" for p in nepakeisti)
+                       + " — jei tai tikrai tavo duomenys, viskas gerai.")
 
-    return True, ["✅ 1 lygis įveiktas! Tavo kortelė pasiruošusi."]
+    if _paskutine_kortele is None:
+        eilutes.append("❌ Dar neatvaizdavai kortelės — paleisk `rodyk_kortele(...)` eilutę.")
+        return False, eilutes
+
+    eilutes.append("✅ 1 lygis įveiktas! Tavo kortelė pasiruošusi.")
+    return True, eilutes
 
 
 def _ivertink_2(erdve):

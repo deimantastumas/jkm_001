@@ -153,16 +153,23 @@ draugai = {
     "Tomas": ("TOMA-4417", "krepšinis"),
     "Eglė":  ("EGLE-9930", "šunys"),
 }
-for vardas, (flagas, interesas) in draugai.items():
-    irasyk_flaga(vardas, flagas, interesas)
+for draugo_vardas, (draugo_flagas, bendras) in draugai.items():
+    irasyk_flaga(draugo_vardas, draugo_flagas, bendras)
 ```
+
+The loop variables are deliberately **not** called `vardas`/`flagas`: `vardas`
+is the pupil's own name from challenge 1, still live in the notebook
+namespace, and a `for vardas, ...` loop would rebind it to the last dictionary
+key — so the final card would be headed with a classmate's name while
+`patikrink(1)` still reported ✅. Shadowing an outer name is the teaching point
+worth one sentence in the markdown cell.
 
 **Final cell** — re-render the card, which has now grown a section:
 
 ```
-Bendri interesai:  su Tomu – krepšinis
-                   su Egle – šunys
-                   su Kaziu – Minecraft
+Bendri interesai:  Tomas – krepšinis
+                   Eglė – šunys
+                   Kazys – Minecraft
 ```
 
 This is what pupils read aloud. The shared-interest field cannot be verified by

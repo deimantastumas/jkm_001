@@ -129,10 +129,19 @@ Themes differ by border characters and accent emoji; at least `"klasika"`,
 `"matrix"`, `"neonas"` exist. Invalid input never raises: a wrong type or an
 unknown theme prints a Lithuanian sentence explaining the fix.
 
+Long field values are truncated to the card width rather than being allowed to
+break the box.
+
 Each call records its arguments in a module-private `_paskutine_kortele`. This
 is how `patikrink` distinguishes "variable was defined" from "variable was
 passed to the card" — that distinction is most of the pedagogical point of
 levels 2 and 3.
+
+Placeholder detection: `kortele.py` owns the canonical placeholder values
+(`"Jonas"`, `16`, `"Vilnius"`, `"moku groti gitara"`, and the starter
+`pomegiai` list) in a module-private constant, and `turinys/*.py` is generated
+from it at build time. The starter cells and the checks therefore cannot drift
+apart.
 
 **`patikrink`** defaults `erdve` to the caller's globals, so pupils write a bare
 `patikrink(2)` while tests inject a dict. Every check produces one of three
@@ -177,7 +186,8 @@ one-column drift is not visible.
     02_lygis.md    02_lygis.py
     03_lygis.md    03_lygis.py
     04_lygis.md    04_lygis.py
-  sprendimai.py                 # reference solutions, one per level
+  sprendimai.py                 # reference solutions: sprendimas_1()..sprendimas_4(),
+                                #   each returns the namespace dict it built
   build.py
   tests/
     test_rodyk_kortele.py
@@ -196,7 +206,8 @@ Each level is a `.md` (rendered as a markdown cell) paired with a `.py`
 `build.py` runs three steps:
 
 1. Pair each `turinys/NN_*.md` with its `.py` into markdown+code cell pairs,
-   in filename order.
+   in filename order, substituting the placeholder values exported by
+   `kortele.py` into the starter snippets.
 2. Write `intro_kortele.ipynb`.
 3. Invoke `jupyter lite build`, bundling `intro_kortele.ipynb` and `kortele.py`
    as notebook contents, output to `dist/`.
@@ -229,9 +240,10 @@ Test-first on the engine; the engine is the part that must not fail in front of
 - The generated notebook is valid JSON with the expected cell sequence.
 - Every starter snippet in `turinys/*.py` `compile()`s — a notebook that greets
   pupils with a `SyntaxError` is the worst possible opening.
-- **Load-bearing:** every solution in `sprendimai.py` is executed and run
-  through `patikrink` for its level, and must pass. A change to a check that
-  breaks the reference answer fails CI rather than the classroom.
+- **Load-bearing:** each `sprendimas_N()` in `sprendimai.py` is executed and the
+  namespace it returns is passed to `patikrink(N, erdve=...)`, which must pass.
+  A change to a check that breaks the reference answer fails CI rather than the
+  classroom.
 
 Not covered by automated tests: JupyterLite itself, Pyodide, and the Pages
 deploy. These get the teacher guide's manual pre-lesson checklist instead.

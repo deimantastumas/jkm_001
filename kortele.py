@@ -6,7 +6,7 @@ Visos viešos funkcijos spausdina lietuviškas žinutes ir niekada nemeta klaid�
 import unicodedata
 
 _VIDUS = 46
-_NULINIO_PLOCIO = {"︎", "️", "‍"}
+_NULINIO_PLOCIO = {"\uFE0E", "\uFE0F", "\u200D"}
 
 _EMOJI_REZIAI = (
     (0x1F300, 0x1FAFF),
@@ -44,6 +44,8 @@ def _plotis(tekstas):
 
 def _apkarpyk(tekstas, max_plotis):
     """Sutrumpina tekstą, kad kortelės rėmelis nesulūžtų."""
+    if max_plotis <= 0:
+        return ""
     if _plotis(tekstas) <= max_plotis:
         return tekstas
     surinkta = ""

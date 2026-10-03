@@ -35,3 +35,11 @@ def test_eilute_visada_to_paties_plocio():
     trumpa = kortele._eilute("a", tema)
     ilga = kortele._eilute("Birutė ąčęėįšųūž", tema)
     assert kortele._plotis(trumpa) == kortele._plotis(ilga)
+
+
+def test_apkarpyk_nuline_plocis_grazina_tuscia():
+    assert kortele._apkarpyk("Birutė", 0) == ""
+
+
+def test_apkarpyk_vieno_plocio_grazina_elipsi():
+    assert kortele._apkarpyk("abc", 1) == "…"

@@ -193,9 +193,13 @@ def _ivertink_1(erdve):
         if klaida:
             return False, [klaida]
 
-    visi_laukai = ("vardas", "amzius", "miestas", "faktas")
-    nepakeisti = [p for p in visi_laukai if erdve[p] == PLACEHOLDERS[p]]
-    if len(nepakeisti) == len(visi_laukai):
+    # amzius sąmoningai neįtrauktas: jo placeholder'is (16) yra įprastas tikras
+    # šios auditorijos amžius, tad lygybė su juo nieko nesako apie tai, ar
+    # mokinys įvedė savo duomenis. vardas/miestas/faktas placeholder'iai
+    # ("Jonas"/"Vilnius"/"moku groti gitara") tokios dviprasmybės neturi.
+    teksto_laukai = ("vardas", "miestas", "faktas")
+    nepakeisti = [p for p in teksto_laukai if erdve[p] == PLACEHOLDERS[p]]
+    if nepakeisti:
         eilutes.append("✋ Kortelė veikia! Dabar įrašyk savo duomenis 🙂")
         eilutes.append("   Dar nepakeisti: " + ", ".join(f"`{p}`" for p in nepakeisti))
         return False, eilutes

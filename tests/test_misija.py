@@ -66,3 +66,22 @@ def test_generuok_flaga_trumpas_vardas_meta_vardo_klaida():
 
 def test_generuok_flaga_triju_raidziu_vardas_veikia():
     assert misija.generuok_flaga("Ema", "ZEBRAI2026").startswith("EMA-")
+
+
+@pytest.fixture(autouse=True)
+def svari_misija():
+    misija._atstatyk()
+    yield
+    misija._atstatyk()
+
+
+def test_pradek_misija_parodo_flaga_ir_vardo_rasyba(capsys):
+    misija.pradek_misija("Birutė", "ZEBRAI2026")
+    isvestis = capsys.readouterr().out
+    assert misija.generuok_flaga("Birutė", "ZEBRAI2026") in isvestis
+    assert "Birutė" in isvestis
+
+
+def test_pradek_misija_su_netinkamu_vardu_nemeta_klaidos(capsys):
+    misija.pradek_misija("Ą", "ZEBRAI2026")
+    assert "vard" in capsys.readouterr().out.lower()

@@ -61,3 +61,95 @@ def _eilute(turinys, tema):
     apkarpyta = _apkarpyk(turinys, _VIDUS)
     uzpildas = " " * (_VIDUS - _plotis(apkarpyta))
     return f"{tema['v']}{apkarpyta}{uzpildas}{tema['v']}"
+
+
+PLACEHOLDERS = {
+    "vardas": "Jonas",
+    "amzius": 16,
+    "miestas": "Vilnius",
+    "faktas": "moku groti gitara",
+    "pomegiai": ["futbolas", "programavimas", "šunys"],
+}
+
+_paskutine_kortele = None
+
+
+def _atstatyk():
+    """Tik testams: pamiršta paskutinę atvaizduotą kortelę."""
+    global _paskutine_kortele
+    _paskutine_kortele = None
+
+
+def _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema):
+    """Grąžina lietuvišką žinutę apie pirmą rastą klaidą arba None."""
+    for pavadinimas, reiksme in (("vardas", vardas), ("miestas", miestas), ("faktas", faktas)):
+        if not isinstance(reiksme, str) or not reiksme.strip():
+            return (f'❗ `{pavadinimas}` turi būti tekstas kabutėse, pvz. '
+                    f'{pavadinimas} = "Birutė".')
+    if isinstance(amzius, bool) or not isinstance(amzius, int):
+        return "❗ `amzius` turi būti skaičius be kabučių, pvz. amzius = 16."
+    if pomegiai is not None and not isinstance(pomegiai, list):
+        return ('❗ `pomegiai` turi būti sąrašas laužtiniuose skliaustuose, pvz. '
+                'pomegiai = ["futbolas", "šunys"].')
+    if slapyvardis is not None and not isinstance(slapyvardis, str):
+        return '❗ `slapyvardis` turi būti tekstas kabutėse.'
+    if not isinstance(tema, str) or tema not in _TEMOS:
+        return (f'❗ `tema` turi būti viena iš: ' + ", ".join(_TEMOS) +
+                f'. Tu parašei „{tema}“.')
+    return None
+
+
+def _gauk_bendrus_interesus(bendri_interesai):
+    if bendri_interesai is not None:
+        return bendri_interesai
+    try:
+        import misija
+    except ImportError:
+        return []
+    return misija.surinkti()
+
+
+def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
+                  slapyvardis=None, tema="klasika", bendri_interesai=None):
+    """Atspausdina asmeninę kortelę."""
+    global _paskutine_kortele
+
+    klaida = _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema)
+    if klaida:
+        print(klaida)
+        return
+
+    t = _TEMOS[tema]
+    virsus = t["vk"] + t["h"] * _VIDUS + t["vd"]
+    skirtukas = t["sk"] + t["h"] * _VIDUS + t["sd"]
+    apacia = t["ak"] + t["h"] * _VIDUS + t["ad"]
+
+    eilutes = [virsus]
+    eilutes.append(_eilute(f"  👤  {vardas.upper()}", t))
+    eilutes.append(_eilute(f"      {amzius} m. · {miestas}", t))
+    eilutes.append(skirtukas)
+    eilutes.append(_eilute("  Apie mane:", t))
+    eilutes.append(_eilute(f"    {faktas}", t))
+
+    if pomegiai:
+        eilutes.append(_eilute("  Pomėgiai:", t))
+        for pomegis in pomegiai:
+            eilutes.append(_eilute(f"    • {pomegis}", t))
+
+    if slapyvardis:
+        eilutes.append(_eilute(f"  Slapyvardis:  {slapyvardis}", t))
+
+    interesai = _gauk_bendrus_interesus(bendri_interesai)
+    if interesai:
+        eilutes.append(skirtukas)
+        eilutes.append(_eilute("  Bendri interesai:", t))
+        for draugas, interesas in interesai:
+            eilutes.append(_eilute(f"    su {draugas} – {interesas}", t))
+
+    eilutes.append(apacia)
+    print("\n".join(eilutes))
+
+    _paskutine_kortele = {
+        "vardas": vardas, "amzius": amzius, "miestas": miestas, "faktas": faktas,
+        "pomegiai": pomegiai, "slapyvardis": slapyvardis, "tema": tema,
+    }

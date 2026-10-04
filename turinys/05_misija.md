@@ -1,6 +1,6 @@
 ---
 
-# 🏴 Antra užduotis: Flagų misija
+# 🏴 Antra užduotis: Bendraklasių slapyvardis
 
 Kiekvienas iš jūsų turi savo **flagą** — slaptą kodą. Jo nematote niekur,
 išskyrus savo ekraną.

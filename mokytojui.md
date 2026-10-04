@@ -226,8 +226,8 @@ jau tik papildoma mintis, ne privaloma dalis.
 Baigiamasis ratas — kiekvienas mokinys garsiai perskaito savo kortelę.
 Klausimai/nurodymai, kuriuos gali duoti:
 
-- „Perskaityk savo kortelę garsiai — vardą, amžių, miestą ir faktą apie
-  save.“
+- „Perskaityk savo kortelę garsiai — vardą, amžių, svajonių projektą ir
+  faktą apie save.“
 - „Jei turi slapyvardį (3 lygis) — pasakyk ir jį, ir iš ko jis sudarytas.“
 - „Ką radai savo kortelės skyriuje Bendri interesai? Su kuo ir ką bendro
   radote?“

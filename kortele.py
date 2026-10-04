@@ -104,7 +104,7 @@ PLACEHOLDERS = {
     "amzius": 28,
     "svajoniu_projektas": "Nuotykių programėlė",
     "faktas": "Turiu dvi kates",
-    "pomegiai": ["futbolas", "programavimas", "katės"],
+    "pomegiai": ["laipiojimas", "programavimas", "choras"],
 }
 
 _paskutine_kortele = None

@@ -1,7 +1,7 @@
-# 👋 Sveiki! Šiandien susipažinsime su Python pagalba
+# 👋 Susipažinimo kortelė
 
 Per artimiausias minutes kiekvienas parašysite programą, kuri atspausdins
-jūsų asmeninę **kortelę**. Paskui su ja eisite ieškoti bendraklasių.
+jūsų asmeninę **kortelę**.
 
 Nebijokite, jei Python matote pirmą kartą — pirmas lygis yra keturios
 eilutės, ir jos jau beveik parašytos.

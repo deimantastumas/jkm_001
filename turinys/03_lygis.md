@@ -6,4 +6,4 @@ Dabar reikšmės neįrašysime, o **apskaičiuosime** iš to, ką jau turime.
 - `.upper()` — paverčia raides DIDŽIOSIOMIS
 - `f"..."` — leidžia į tekstą įterpti reikšmes per `{ }`
 
-Paleiskite ir pažiūrėkite, koks slapyvardis gavosi. Palyginkite su kaimynu!
+Paleiskite ir pažiūrėkite, koks slapyvardis gavosi.

@@ -64,12 +64,12 @@ from kortele import rodyk_kortele, patikrink
 **Level 1 — "Kas tu esi?"** · variable, string, integer, function call
 
 ```python
-vardas  = "Jonas"
-amzius  = 16
-miestas = "Vilnius"
-faktas  = "moku groti gitara"
+vardas             = "Deimantas"
+amzius             = 28
+svajoniu_projektas = "Nuotykių programėlė"
+faktas             = "Turiu dvi kates"
 
-rodyk_kortele(vardas, amzius, miestas, faktas)
+rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas)
 patikrink(1)
 ```
 
@@ -81,7 +81,7 @@ Ships pre-filled so running it works immediately — nobody faces a blank cell.
 ```python
 pomegiai = ["futbolas", "programavimas", "šunys"]
 
-rodyk_kortele(vardas, amzius, miestas, faktas, pomegiai=pomegiai)
+rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, pomegiai=pomegiai)
 patikrink(2)
 ```
 
@@ -91,7 +91,7 @@ arithmetic
 ```python
 slapyvardis = f"{vardas[:3].upper()}-{amzius * 2}"
 
-rodyk_kortele(vardas, amzius, miestas, faktas, pomegiai=pomegiai, slapyvardis=slapyvardis)
+rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, pomegiai=pomegiai, slapyvardis=slapyvardis)
 patikrink(3)
 ```
 
@@ -211,7 +211,7 @@ says so explicitly.
 ### 5.1 `kortele.py`
 
 ```python
-def rodyk_kortele(vardas, amzius, miestas, faktas, *,
+def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *,
                   pomegiai=None, slapyvardis=None, tema="klasika",
                   bendri_interesai=None) -> None
 def patikrink(lygis, *, erdve=None) -> None
@@ -242,13 +242,13 @@ or a specific hint naming the variable at fault.
 
 | Level | Passes when |
 | --- | --- |
-| 1 | `vardas`, `miestas`, `faktas` are non-empty strings; `amzius` is an int; none still hold placeholder values; the card was rendered |
+| 1 | `vardas`, `svajoniu_projektas`, `faktas` are non-empty strings; `amzius` is an int; the card was rendered; and **not all three** text fields still hold placeholder values (a single match yields a non-blocking nudge, never a block — see §5.3) |
 | 2 | `pomegiai` is a list of ≥2 non-empty strings *and* was passed to `rodyk_kortele` |
 | 3 | `slapyvardis` is a non-empty string, differs from `vardas`, and was passed to `rodyk_kortele` |
 | 4 | Always reports; describes which of (a)/(b)/(c) it detected. If `slapyvardis_is` exists, it is called with the engine's own inputs and its return value is checked for being a non-constant string |
 
 Placeholder detection: `kortele.py` owns the canonical placeholder values
-(`"Jonas"`, `16`, `"Vilnius"`, `"moku groti gitara"`, and the starter
+(`"Deimantas"`, `28`, `"Nuotykių programėlė"`, `"Turiu dvi kates"`, and the starter
 `pomegiai` list) in a module-private constant, and `turinys/*.py` is generated
 from it at build time. The starter cells and the checks cannot drift apart.
 
@@ -292,6 +292,27 @@ whose assigned partner is absent or busy can simply go to someone else; the
 
 `misijos_bukle()` prints progress (`2/3 — dar vienas pokalbis!`) and the names
 already recorded.
+
+### 5.2a Free-text fields and wrapping
+
+`svajoniu_projektas` replaces the original `miestas` field: every pupil in
+this group is from the same city, so the question carried no information,
+whereas "what would you build if you already knew how" is the most
+revealing thing on the card. It occupies the same positional slot, so
+Level 1 is still four variables.
+
+`svajoniu_projektas` and `faktas` are free text and are **word-wrapped**
+across as many card lines as they need, via a private display-width-aware
+`_lauzyk` helper. These are the fields pupils read aloud; truncating them
+with `…` would cut off the most personal answer. A single word longer than
+the card interior is still truncated, since nothing else can preserve the
+border. List items (`pomegiai`, `bendri_interesai`) keep truncating — they
+are short by nature.
+
+Placeholder values are the teacher's own card, so pupils see a real
+completed example before making theirs. This also sharpens placeholder
+detection: the original `"Vilnius"` matched roughly a third of pupils
+genuinely, while nobody coincidentally writes the teacher's dream project.
 
 ### 5.3 Card width handling
 

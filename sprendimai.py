@@ -13,18 +13,18 @@ from kortele import rodyk_kortele
 def sprendimas_1():
     vardas = "Birutė"
     amzius = 17
-    miestas = "Kaunas"
+    svajoniu_projektas = "robotas, kuris tvarko kambarį"
     faktas = "turiu du šunis"
 
-    rodyk_kortele(vardas, amzius, miestas, faktas)
-    return {"vardas": vardas, "amzius": amzius, "miestas": miestas, "faktas": faktas}
+    rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas)
+    return {"vardas": vardas, "amzius": amzius, "svajoniu_projektas": svajoniu_projektas, "faktas": faktas}
 
 
 def sprendimas_2():
     erdve = sprendimas_1()
     pomegiai = ["krepšinis", "fotografija", "animė"]
 
-    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["miestas"], erdve["faktas"],
+    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["svajoniu_projektas"], erdve["faktas"],
                   pomegiai=pomegiai)
     erdve["pomegiai"] = pomegiai
     return erdve
@@ -34,7 +34,7 @@ def sprendimas_3():
     erdve = sprendimas_2()
     slapyvardis = f"{erdve['vardas'][:3].upper()}-{erdve['amzius'] * 2}"
 
-    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["miestas"], erdve["faktas"],
+    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["svajoniu_projektas"], erdve["faktas"],
                   pomegiai=erdve["pomegiai"], slapyvardis=slapyvardis)
     erdve["slapyvardis"] = slapyvardis
     return erdve
@@ -49,7 +49,7 @@ def sprendimas_4():
     erdve = sprendimas_3()
     faktai = ["turiu du šunis", "moku žongliruoti", "buvau Islandijoje"]
 
-    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["miestas"],
+    rodyk_kortele(erdve["vardas"], erdve["amzius"], erdve["svajoniu_projektas"],
                   random.choice(faktai),
                   pomegiai=erdve["pomegiai"], slapyvardis=erdve["slapyvardis"],
                   tema="matrix")

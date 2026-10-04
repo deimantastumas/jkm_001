@@ -71,7 +71,7 @@ def test_zymekliu_reiksmes_ateina_is_varikliu():
     assert build.PAKEITIMAI == {
         "@@vardas@@": p["vardas"],
         "@@amzius@@": str(p["amzius"]),
-        "@@miestas@@": p["miestas"],
+        "@@svajoniu_projektas@@": p["svajoniu_projektas"],
         "@@faktas@@": p["faktas"],
         "@@pomegiai@@": build._sarasas_literalu(p["pomegiai"]),
         "@@pavyzdys_vardas@@": misija.PAVYZDYS[0],

@@ -29,7 +29,7 @@ def _pakeitimai():
     return {
         "@@vardas@@": p["vardas"],
         "@@amzius@@": str(p["amzius"]),
-        "@@miestas@@": p["miestas"],
+        "@@svajoniu_projektas@@": p["svajoniu_projektas"],
         "@@faktas@@": p["faktas"],
         "@@pomegiai@@": _sarasas_literalu(p["pomegiai"]),
         "@@pavyzdys_vardas@@": pav_vardas,

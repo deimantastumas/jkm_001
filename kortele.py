@@ -64,12 +64,47 @@ def _eilute(turinys, tema):
     return f"{tema['v']}{apkarpyta}{uzpildas}{tema['v']}"
 
 
+def _lauzyk(tekstas, plotis):
+    """Perkelia ilgą tekstą į kelias eilutes, laužydamas ties žodžių ribomis.
+
+    Laisvo teksto laukus (`svajoniu_projektas`, `faktas`) mokinys skaito
+    garsiai, tad jų nukirsti negalima. Matuojama `_plotis`, o ne `len`, kad
+    emoji ir lietuviškos raidės būtų suskaičiuotos teisingai. Žodis, ilgesnis
+    už visą eilutę, apkarpomas — kitaip rėmelis sulūžtų.
+    """
+    eilutes = []
+    dabartine = ""
+    for zodis in tekstas.split():
+        if not dabartine:
+            kandidatas = zodis
+        else:
+            kandidatas = f"{dabartine} {zodis}"
+        if _plotis(kandidatas) <= plotis:
+            dabartine = kandidatas
+            continue
+        if dabartine:
+            eilutes.append(dabartine)
+        while _plotis(zodis) > plotis:
+            eilutes.append(_apkarpyk(zodis, plotis))
+            zodis = ""
+        dabartine = zodis
+    if dabartine:
+        eilutes.append(dabartine)
+    return eilutes or [""]
+
+
+def _eilutes_su_lauzymu(tekstas, iktrauka, tema):
+    """Kortelės eilutės vienam laisvo teksto laukui, su įtrauka."""
+    return [_eilute(f"{iktrauka}{e}", tema)
+            for e in _lauzyk(tekstas, _VIDUS - _plotis(iktrauka))]
+
+
 PLACEHOLDERS = {
-    "vardas": "Jonas",
-    "amzius": 16,
-    "miestas": "Vilnius",
-    "faktas": "moku groti gitara",
-    "pomegiai": ["futbolas", "programavimas", "šunys"],
+    "vardas": "Deimantas",
+    "amzius": 28,
+    "svajoniu_projektas": "Nuotykių programėlė",
+    "faktas": "Turiu dvi kates",
+    "pomegiai": ["futbolas", "programavimas", "katės"],
 }
 
 _paskutine_kortele = None
@@ -87,10 +122,12 @@ def _tinkama_interesu_pora(elementas):
             and isinstance(elementas[0], str) and isinstance(elementas[1], str))
 
 
-def _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema,
+def _patikrink_ivesti(vardas, amzius, svajoniu_projektas, faktas, pomegiai, slapyvardis, tema,
                        bendri_interesai):
     """Grąžina lietuvišką žinutę apie pirmą rastą klaidą arba None."""
-    for pavadinimas, reiksme in (("vardas", vardas), ("miestas", miestas), ("faktas", faktas)):
+    for pavadinimas, reiksme in (("vardas", vardas),
+                                 ("svajoniu_projektas", svajoniu_projektas),
+                                 ("faktas", faktas)):
         if not isinstance(reiksme, str) or not reiksme.strip():
             return (f'❗ `{pavadinimas}` turi būti tekstas kabutėse, pvz. '
                     f'{pavadinimas} = "Birutė".')
@@ -122,12 +159,13 @@ def _gauk_bendrus_interesus(bendri_interesai):
     return misija.surinkti()
 
 
-def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
+def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *, pomegiai=None,
                   slapyvardis=None, tema="klasika", bendri_interesai=None):
     """Atspausdina asmeninę kortelę."""
     global _paskutine_kortele
 
-    klaida = _patikrink_ivesti(vardas, amzius, miestas, faktas, pomegiai, slapyvardis, tema,
+    klaida = _patikrink_ivesti(vardas, amzius, svajoniu_projektas, faktas, pomegiai,
+                                slapyvardis, tema,
                                 bendri_interesai)
     if klaida:
         print(klaida)
@@ -140,10 +178,12 @@ def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
 
     eilutes = [virsus]
     eilutes.append(_eilute(f"  👤  {vardas.upper()}", t))
-    eilutes.append(_eilute(f"      {amzius} m. · {miestas}", t))
+    eilutes.append(_eilute(f"      {amzius} m.", t))
     eilutes.append(skirtukas)
+    eilutes.append(_eilute("  Svajonių projektas:", t))
+    eilutes.extend(_eilutes_su_lauzymu(svajoniu_projektas, "    ", t))
     eilutes.append(_eilute("  Apie mane:", t))
-    eilutes.append(_eilute(f"    {faktas}", t))
+    eilutes.extend(_eilutes_su_lauzymu(faktas, "    ", t))
 
     if pomegiai:
         eilutes.append(_eilute("  Pomėgiai:", t))
@@ -167,7 +207,8 @@ def rodyk_kortele(vardas, amzius, miestas, faktas, *, pomegiai=None,
     print("\n".join(eilutes))
 
     _paskutine_kortele = {
-        "vardas": vardas, "amzius": amzius, "miestas": miestas, "faktas": faktas,
+        "vardas": vardas, "amzius": amzius,
+        "svajoniu_projektas": svajoniu_projektas, "faktas": faktas,
         "pomegiai": pomegiai, "slapyvardis": slapyvardis, "tema": tema,
     }
 
@@ -187,7 +228,7 @@ def _ivertink_1(erdve):
     eilutes = []
     laukai = (
         ("vardas", str, 'tekstas kabutėse, pvz. "Birutė"'),
-        ("miestas", str, 'tekstas kabutėse, pvz. "Kaunas"'),
+        ("svajoniu_projektas", str, 'tekstas kabutėse, pvz. "Nuotykių programėlė"'),
         ("faktas", str, "tekstas kabutėse"),
         ("amzius", int, "skaičius be kabučių, pvz. 16"),
     )
@@ -196,20 +237,18 @@ def _ivertink_1(erdve):
         if klaida:
             return False, [klaida]
 
-    # amzius sąmoningai neįtrauktas: jo placeholder'is (16) yra įprastas tikras
-    # šios auditorijos amžius, tad lygybė su juo nieko nesako apie tai, ar
-    # mokinys įvedė savo duomenis.
+    # amzius sąmoningai neįtrauktas: placeholder'iai yra mokytojo duomenys,
+    # o lauko sutapimas su jais turi reikšti „dar nepakeista“, ne sutapimą su
+    # tikrove. Amžius yra vienintelis laukas, kur mokinys gali atsitiktinai
+    # įrašyti tą pačią reikšmę, tad jis iš patikros išimtas.
     #
-    # Tas pats dviprasmiškumas galioja ir atskiriems teksto laukams: „Jonas“
-    # yra vienas dažniausių lietuviškų vardų, o Vilniuje gyvena maždaug
-    # trečdalis šalies mokinių. Tad vieno lauko sutapimo neužtenka — blokavus
-    # jį, tikras Jonas iš Vilniaus niekada nepraeitų nė vieno lygio (2 ir 3
-    # lygiai eina per šį patikrinimą), ir dar būtų kaltinamas tuo, ko nepadarė.
-    # Blokuojame tik tada, kai NEPAKEISTI VISI TRYS — o kadangi „moku groti
-    # gitara“ niekas neparašo atsitiktinai, nepaliestas langelis vis tiek
-    # pagaunamas kiekvieną kartą. Dalinis sutapimas duoda neblokuojantį
-    # priminimą, tad ir Jono miestą nešiojantis mokinys informaciją gauna.
-    teksto_laukai = ("vardas", "miestas", "faktas")
+    # Blokuojame tik tada, kai NEPAKEISTI VISI TRYS teksto laukai. Vieno lauko
+    # sutapimo neužtenka: mokinys gali turėti tokį patį pomėgį ar panašią
+    # svajonę, ir suklaidinti jį pranešimu „įrašyk savo duomenis“, kai jis
+    # kaip tik tai ir padarė, yra blogiau nei praleisti pusiau užpildytą
+    # kortelę. Nepaliestas langelis vis tiek pagaunamas kiekvieną kartą.
+    # Dalinis sutapimas duoda neblokuojantį priminimą.
+    teksto_laukai = ("vardas", "svajoniu_projektas", "faktas")
     nepakeisti = [p for p in teksto_laukai if erdve[p] == PLACEHOLDERS[p]]
     if len(nepakeisti) == len(teksto_laukai):
         eilutes.append("✋ Kortelė veikia! Dabar įrašyk savo duomenis 🙂")
@@ -243,7 +282,7 @@ def _ivertink_2(erdve):
     if len(tinkami) < 2:
         return False, ["❌ Įrašyk bent du pomėgius į sąrašą."]
     if pomegiai == PLACEHOLDERS["pomegiai"]:
-        return False, ["✋ Čia dar Jono pomėgiai — įrašyk savo."]
+        return False, ["✋ Čia dar mokytojo pomėgiai — įrašyk savo."]
     if _paskutine_kortele is None or _paskutine_kortele.get("pomegiai") != pomegiai:
         return False, ["❌ `pomegiai` jau yra, bet dar neperduoti kortelei.",
                        "   Pridėk `pomegiai=pomegiai` į `rodyk_kortele(...)`."]

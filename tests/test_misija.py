@@ -235,7 +235,7 @@ def test_vardo_vietazenklis_tik_perspeja_bet_registruoja(capsys):
     isvestis = capsys.readouterr().out
     assert "✋" in isvestis
     assert "Misija pradėta" in isvestis
-    assert misija._mano_norm == "jonas"
+    assert misija._mano_norm == "deimantas"
 
 
 def test_placeholder_kodas_atitinka_starterio_langeli():

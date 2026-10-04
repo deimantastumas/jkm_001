@@ -101,14 +101,14 @@ Visi keturi lygiai yra `sprendimai.py` — `sprendimas_1()` .. `sprendimas_4()`.
 **Svarbu:** jie sujungti grandine — `sprendimas_2()` pirmiausia iškviečia
 `sprendimas_1()` ir prideda prie jo rezultato, `sprendimas_3()` iškviečia
 `sprendimas_2()` ir t. t. Tai reiškia:
-- konkrečios reikšmės (vardas, amžius, miestas, faktas) užrašytos **tik
+- konkrečios reikšmės (vardas, amžius, svajonių projektas, faktas) užrašytos **tik
   `sprendimas_1()` viduje** — kituose levelio sprendimuose jų nebeieškok;
 - failą skaityk nuo viršaus į apačią kaip vieną tekstą, o ne kaip keturias
   nepriklausomas funkcijas.
 
 Trumpai, kas kiekviename:
 
-- **1 lygis** — `vardas`, `amzius`, `miestas`, `faktas` kintamieji,
+- **1 lygis** — `vardas`, `amzius`, `svajoniu_projektas`, `faktas` kintamieji,
   perduoti `rodyk_kortele(...)`.
 - **2 lygis** — prideda `pomegiai` sąrašą (bent 2 elementai), perduoda
   `pomegiai=pomegiai`.

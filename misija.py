@@ -77,23 +77,21 @@ def _vardo_vietazenklis():
 _mano_vardas = None
 _mano_norm = None
 _klases_kodas = None
-_tikslas = 3
 _draugai = []
 
 
 def _atstatyk():
     """Tik testams: išvalo misijos būseną."""
-    global _mano_vardas, _mano_norm, _klases_kodas, _tikslas, _draugai
+    global _mano_vardas, _mano_norm, _klases_kodas, _draugai
     _mano_vardas = None
     _mano_norm = None
     _klases_kodas = None
-    _tikslas = 3
     _draugai = []
 
 
-def pradek_misija(vardas, klases_kodas, *, tikslas=3):
+def pradek_misija(vardas, klases_kodas):
     """Užregistruoja mokinį ir parodo jo flagą."""
-    global _mano_vardas, _mano_norm, _klases_kodas, _tikslas, _draugai
+    global _mano_vardas, _mano_norm, _klases_kodas, _draugai
 
     if not isinstance(vardas, str) or not vardas.strip():
         print('❗ Įrašyk savo vardą kabutėse, pvz. pradek_misija("Birutė", "ZEBRAI2026").')
@@ -101,10 +99,6 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
     if not isinstance(klases_kodas, str) or not klases_kodas.strip():
         print("❗ Klasės kodas užrašytas ant lentos — įrašyk jį kabutėse.")
         return
-    if isinstance(tikslas, bool) or not isinstance(tikslas, int) or tikslas <= 0:
-        print("❗ tikslas turi būti teigiamas skaičius be kabučių, pvz. tikslas=3.")
-        return
-
     # Nepataisytas langelis: klasės kodas yra vienintelis vienareikšmis ženklas —
     # tikras kodas visada ateina nuo lentos, tad niekas jo taip nepavadins.
     # Registruoti negalima: tokiu atveju mokinys gautų svetimą flagą ir visus
@@ -143,12 +137,10 @@ def pradek_misija(vardas, klases_kodas, *, tikslas=3):
     _mano_vardas = vardas.strip()
     _mano_norm = naujas_norm
     _klases_kodas = klases_kodas
-    _tikslas = tikslas
 
     print("🎒 Misija pradėta!")
     print(f"   Tavo flagas:     {flagas}")
     print(f"   Sakyk draugams:  {_mano_vardas}")
-    print(f"   Tikslas:         {tikslas} pokalbiai")
     print("   Po kiekvieno pokalbio užpildyk ir paleisk kitą langelį.")
 
 
@@ -212,11 +204,6 @@ def misijos_bukle():
     if _mano_norm is None:
         print("❗ Pirmiausia paleisk langelį su pradek_misija(...).")
         return
-    print(f"📋 Misijos būklė: {len(_draugai)}/{_tikslas}")
+    print(f"📋 Surinkta flagų: {len(_draugai)}")
     for draugas in _draugai:
         print(f"   ✅ {draugas['vardas']} – {draugas['interesas']}")
-    truksta = _tikslas - len(_draugai)
-    if truksta > 0:
-        print(f"   Liko pokalbių: {truksta}")
-    else:
-        print("   🎉 Misija įvykdyta!")

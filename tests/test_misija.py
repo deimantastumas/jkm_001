@@ -166,7 +166,7 @@ def test_misijos_bukle_rodo_progresa(capsys):
     capsys.readouterr()
     misija.misijos_bukle()
     isvestis = capsys.readouterr().out
-    assert "1/3" in isvestis
+    assert "Surinkta flagų: 1" in isvestis
     assert "Tomas" in isvestis
 
 
@@ -192,18 +192,6 @@ def test_pradek_misija_kitu_vardu_pradeda_is_naujo():
 # value (e.g. a quoted string) stored into module state would raise a raw
 # TypeError later, inside misijos_bukle's "_tikslas - len(_draugai)". Must
 # print, not raise, and must leave the mission unregistered.
-@pytest.mark.parametrize("blogas_tikslas", ["3", 0, -1])
-def test_pradek_misija_su_netinkamu_tikslu_nemeta_klaidos_ir_neregistruoja(capsys, blogas_tikslas):
-    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=blogas_tikslas)
-    assert "tikslas" in capsys.readouterr().out.lower()
-    assert misija._mano_norm is None
-
-
-# ---- C2: nepataisytas pradek_misija langelis ----
-#
-# Nepaleistas pro šalį šis langelis anksčiau registruodavo mokinį kaip „Jonas“
-# su kodu „KLASES-KODAS“ ir linksmai pranešdavo „🎒 Misija pradėta!“. Toliau
-# visi trys raundai žlugdavo, o žinutė kaltindavo partnerio vardą.
 
 @pytest.mark.parametrize("kodas", ["KLASES-KODAS", "klases-kodas", " KLASES-KODAS "])
 def test_pradek_misija_su_vietazenkliu_kodu_neregistruoja(capsys, kodas):
@@ -328,30 +316,8 @@ def test_misijos_bukle_pries_pradek_misija_yra_zinute(capsys):
     assert "pradek_misija" in capsys.readouterr().out
 
 
-def test_misijos_bukle_pasiekus_tiksla_svencia(capsys):
-    """Žinutė, kurią pamato KIEKVIENAS misiją baigęs mokinys."""
-    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=2)
-    for vardas, interesas in [("Tomas", "krepšinis"), ("Eglė", "šunys")]:
-        misija.irasyk_flaga(vardas, misija.generuok_flaga(vardas, "ZEBRAI2026"), interesas)
-    capsys.readouterr()
-    misija.misijos_bukle()
-    isvestis = capsys.readouterr().out
-    assert "2/2" in isvestis
-    assert "🎉 Misija įvykdyta!" in isvestis
-    assert "Liko pokalbių" not in isvestis
 
 
-def test_misijos_bukle_virs_tikslo_vis_dar_svencia(capsys):
-    misija.pradek_misija("Birutė", "ZEBRAI2026", tikslas=1)
-    for vardas, interesas in [("Tomas", "krepšinis"), ("Eglė", "šunys")]:
-        misija.irasyk_flaga(vardas, misija.generuok_flaga(vardas, "ZEBRAI2026"), interesas)
-    capsys.readouterr()
-    misija.misijos_bukle()
-    assert "🎉 Misija įvykdyta!" in capsys.readouterr().out
-
-
-# Minor: ℹ be variacijos selektoriaus (U+FE0F) — šaltinyje nelieka nematomų
-# kodo taškų, kaip reikalauja projekto taisyklė.
 def test_saltinyje_nera_variacijos_selektoriu():
     from pathlib import Path
     assert "\ufe0f" not in Path("misija.py").read_text(encoding="utf-8")

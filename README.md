@@ -67,10 +67,10 @@ a traceback over a half-printed table.
 **Engines** (imported by the notebook and by `tests/`; no side effects on
 import):
 - `kortele.py` — Challenge 1. `rodyk_kortele(...)` renders the card;
-  `patikrink(lygis)` self-checks a pupil's progress against one of four
+  `patikrink(lygis)` acknowledges a level; it verifies nothing (one of four
   levels. Never raises; every bad input path prints a Lithuanian message.
 - `misija.py` — Challenge 2. `pradek_misija(vardas, klases_kodas, *,
-  tikslas=3)` registers a pupil and shows their flag; `irasyk_flaga(vardas,
+  klases_kodas)` registers a pupil and shows their flag; `irasyk_flaga(vardas,
   flagas, bendras_interesas)` verifies a partner's flag and records the
   shared interest; `misijos_bukle()` prints progress. Flags are derived via
   HMAC from the pupil's name and the class code — nothing is persisted or
@@ -108,7 +108,7 @@ import):
   every push and locally via `build.py`.
 
 **Tests** (`tests/`, run with `./.venv/bin/python -m pytest`):
-- `test_rodyk_kortele.py`, `test_misija.py`, `test_patikrink.py` — engine
+- `test_rodyk_kortele.py`, `test_misija.py` — engine
   behaviour, including that malformed input never raises.
 - `test_poros.py` — pairing correctness, the name-collision guard, and
   every refusal path in `main()`.

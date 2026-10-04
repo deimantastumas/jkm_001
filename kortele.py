@@ -3,7 +3,6 @@
 Visos viešos funkcijos spausdina lietuviškas žinutes ir niekada nemeta klaidų.
 """
 
-import sys
 import unicodedata
 
 _VIDUS = 46
@@ -128,15 +127,6 @@ PLACEHOLDERS = {
     "pomegiai": ["laipiojimas", "programavimas", "choras"],
 }
 
-_paskutine_kortele = None
-
-
-def _atstatyk():
-    """Tik testams: pamiršta paskutinę atvaizduotą kortelę."""
-    global _paskutine_kortele
-    _paskutine_kortele = None
-
-
 def _tinkama_interesu_pora(elementas):
     """Ar elementas yra (vardas, interesas) pora iš dviejų tekstų."""
     return (isinstance(elementas, (tuple, list)) and len(elementas) == 2
@@ -183,8 +173,6 @@ def _gauk_bendrus_interesus(bendri_interesai):
 def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *, pomegiai=None,
                   slapyvardis=None, tema="klasika", bendri_interesai=None):
     """Atspausdina asmeninę kortelę."""
-    global _paskutine_kortele
-
     klaida = _patikrink_ivesti(vardas, amzius, svajoniu_projektas, faktas, pomegiai,
                                 slapyvardis, tema,
                                 bendri_interesai)
@@ -227,154 +215,14 @@ def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *, pomegiai=None,
     eilutes.append(apacia)
     print("\n".join(_nuspalvink(eilutes, t)))
 
-    _paskutine_kortele = {
-        "vardas": vardas, "amzius": amzius,
-        "svajoniu_projektas": svajoniu_projektas, "faktas": faktas,
-        "pomegiai": pomegiai, "slapyvardis": slapyvardis, "tema": tema,
-    }
 
 
-def _truksta_arba_blogas_tipas(erdve, pavadinimas, tipas, aprasas):
-    if pavadinimas not in erdve:
-        return f"❌ Nerandu kintamojo `{pavadinimas}`. Ar paleidai langelį?"
-    reiksme = erdve[pavadinimas]
-    if isinstance(reiksme, bool) or not isinstance(reiksme, tipas):
-        return f"❌ `{pavadinimas}` turi būti {aprasas}."
-    if isinstance(reiksme, str) and not reiksme.strip():
-        return f"❌ `{pavadinimas}` tuščias — įrašyk savo duomenis."
-    return None
+def patikrink(lygis):
+    """Pažymi, kad lygis atliktas.
 
-
-def _ivertink_1(erdve):
-    eilutes = []
-    laukai = (
-        ("vardas", str, 'tekstas kabutėse, pvz. "Birutė"'),
-        ("svajoniu_projektas", str, 'tekstas kabutėse, pvz. "Nuotykių programėlė"'),
-        ("faktas", str, "tekstas kabutėse"),
-        ("amzius", int, "skaičius be kabučių, pvz. 16"),
-    )
-    for pavadinimas, tipas, aprasas in laukai:
-        klaida = _truksta_arba_blogas_tipas(erdve, pavadinimas, tipas, aprasas)
-        if klaida:
-            return False, [klaida]
-
-    # amzius sąmoningai neįtrauktas: placeholder'iai yra mokytojo duomenys,
-    # o lauko sutapimas su jais turi reikšti „dar nepakeista“, ne sutapimą su
-    # tikrove. Amžius yra vienintelis laukas, kur mokinys gali atsitiktinai
-    # įrašyti tą pačią reikšmę, tad jis iš patikros išimtas.
-    #
-    # Blokuojame tik tada, kai NEPAKEISTI VISI TRYS teksto laukai. Vieno lauko
-    # sutapimo neužtenka: mokinys gali turėti tokį patį pomėgį ar panašią
-    # svajonę, ir suklaidinti jį pranešimu „įrašyk savo duomenis“, kai jis
-    # kaip tik tai ir padarė, yra blogiau nei praleisti pusiau užpildytą
-    # kortelę. Nepaliestas langelis vis tiek pagaunamas kiekvieną kartą.
-    # Dalinis sutapimas duoda neblokuojantį priminimą.
-    teksto_laukai = ("vardas", "svajoniu_projektas", "faktas")
-    nepakeisti = [p for p in teksto_laukai if erdve[p] == PLACEHOLDERS[p]]
-    if len(nepakeisti) == len(teksto_laukai):
-        eilutes.append("✋ Kortelė veikia! Dabar įrašyk savo duomenis 🙂")
-        eilutes.append("   Dar nepakeisti: " + ", ".join(f"`{p}`" for p in nepakeisti))
-        return False, eilutes
-
-    if nepakeisti:
-        eilutes.append("ℹ Sutampa su pavyzdžiu: "
-                       + ", ".join(f"`{p}`" for p in nepakeisti)
-                       + " — jei tai tikrai tavo duomenys, viskas gerai.")
-
-    if _paskutine_kortele is None:
-        eilutes.append("❌ Dar neatvaizdavai kortelės — paleisk `rodyk_kortele(...)` eilutę.")
-        return False, eilutes
-
-    eilutes.append("✅ 1 lygis įveiktas! Tavo kortelė pasiruošusi.")
-    return True, eilutes
-
-
-def _ivertink_2(erdve):
-    praejo, eilutes = _ivertink_1(erdve)
-    if not praejo:
-        return False, eilutes
-
-    if "pomegiai" not in erdve:
-        return False, ["❌ Nerandu kintamojo `pomegiai`."]
-    pomegiai = erdve["pomegiai"]
-    if not isinstance(pomegiai, list):
-        return False, ['❌ `pomegiai` turi būti sąrašas, pvz. ["futbolas", "šunys"].']
-    tinkami = [p for p in pomegiai if isinstance(p, str) and p.strip()]
-    if len(tinkami) < 2:
-        return False, ["❌ Įrašyk bent du pomėgius į sąrašą."]
-    if pomegiai == PLACEHOLDERS["pomegiai"]:
-        return False, ["✋ Čia dar mokytojo pomėgiai — įrašyk savo."]
-    if _paskutine_kortele is None or _paskutine_kortele.get("pomegiai") != pomegiai:
-        return False, ["❌ `pomegiai` jau yra, bet dar neperduoti kortelei.",
-                       "   Pridėk `pomegiai=pomegiai` į `rodyk_kortele(...)`."]
-
-    return True, ["✅ 2 lygis įveiktas! Pomėgiai jau kortelėje."]
-
-
-def _ivertink_3(erdve):
-    praejo, eilutes = _ivertink_2(erdve)
-    if not praejo:
-        return False, eilutes
-
-    if "slapyvardis" not in erdve:
-        return False, ["❌ Nerandu kintamojo `slapyvardis`."]
-    slapyvardis = erdve["slapyvardis"]
-    if not isinstance(slapyvardis, str) or not slapyvardis.strip():
-        return False, ["❌ `slapyvardis` turi būti netuščias tekstas."]
-    if slapyvardis == erdve["vardas"]:
-        return False, ["❌ Slapyvardis toks pat kaip vardas — apskaičiuok jį iš vardo."]
-    if _paskutine_kortele is None or _paskutine_kortele.get("slapyvardis") != slapyvardis:
-        return False, ["❌ `slapyvardis` jau yra, bet dar neperduotas kortelei.",
-                       "   Pridėk `slapyvardis=slapyvardis` į `rodyk_kortele(...)`."]
-
-    return True, ["✅ 3 lygis įveiktas! Palygink slapyvardį su kaimynu."]
-
-
-def _ivertink_4(erdve):
-    eilutes = ["🚀 4 lygis — laisvas režimas. Štai ką radau:"]
-
-    funkcija = erdve.get("slapyvardis_is")
-    if callable(funkcija):
-        try:
-            a = funkcija("Testas", 15)
-            b = funkcija("Kitas", 17)
-        except Exception:
-            eilutes.append("   ⚠ `slapyvardis_is` yra, bet su mano duomenimis nesuveikė.")
-        else:
-            if isinstance(a, str) and isinstance(b, str) and a.strip() and a != b:
-                eilutes.append(f"   ✅ `slapyvardis_is` veikia: Testas → {a}, Kitas → {b}")
-            else:
-                eilutes.append("   ⚠ `slapyvardis_is` grąžina tą patį visiems — pasinaudok argumentais.")
-    elif funkcija is not None:
-        eilutes.append("   ⚠ `slapyvardis_is` yra, bet tai ne funkcija.")
-
-    if "random" in erdve:
-        eilutes.append("   ✅ Naudoji `random` — atsitiktinumas įjungtas.")
-
-    if _paskutine_kortele and _paskutine_kortele.get("tema") != "klasika":
-        eilutes.append(f"   ✅ Radai slaptą temą: {_paskutine_kortele['tema']}")
-
-    if len(eilutes) == 1:
-        eilutes.append("   Dar nieko — pasirink a), b) arba c) ir bandyk!")
-    eilutes.append("   Čia teisingo atsakymo nėra. Daryk, kas įdomu.")
-    return True, eilutes
-
-
-_VERTINTOJAI = {1: _ivertink_1, 2: _ivertink_2, 3: _ivertink_3, 4: _ivertink_4}
-
-
-def _ivertink(lygis, erdve):
-    """Grąžina (ar praėjo, eilučių sąrašas). Tik vidiniam naudojimui ir testams."""
-    vertintojas = _VERTINTOJAI.get(lygis)
-    if vertintojas is None:
-        return False, [f"❓ Tokio lygio nėra: {lygis}. Galimi: 1, 2, 3, 4."]
-    return vertintojas(erdve)
-
-
-def patikrink(lygis, *, erdve=None):
-    """Patikrina, ar lygis įveiktas, ir paaiškina, ko trūksta."""
-    if erdve is None:
-        erdve = sys._getframe(1).f_globals
-    _, eilutes = _ivertink(lygis, erdve)
-    for eilute in eilutes:
-        print(eilute)
+    Sąmoningai nieko netikrina: mokytojas pats padeda, jei kam nors nesiseka.
+    Automatinis tikrinimas buvo pašalintas — jis klaidingai priekaištaudavo
+    mokiniams, kurie viską padarė teisingai, ir atimdavo iš mokytojo
+    galimybę pamatyti, kur iš tikrųjų stringama.
+    """
+    print(f"✅ {lygis} lygis įveiktas!")

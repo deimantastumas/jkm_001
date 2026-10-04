@@ -40,7 +40,7 @@ Skill levels range from "writes Python already" to "has never seen code".
 | Pairings projected by the teacher, not served by the site | Same reason. The site never needs to know who is in the room. |
 | Mutual pairing (A↔B in rounds) | One-directional assignment produces twenty pupils wandering into each other's half-finished conversations. |
 | Client-side flag derivation is *accepted*, not mitigated | Impossible to prevent without a server, and it is the lesson's best teaching moment (§4.3). |
-| `patikrink(n)` self-check per tier | Keeps 20 pupils unblocked without the teacher reaching each one. |
+| `patikrink(n)` marks a level done; it does NOT verify | Automatic checking was removed after it wrongly told correct pupils their real data was a placeholder. The teacher gives feedback in person; the code only acknowledges. |
 
 Explicitly rejected: Google Colab (requires Google accounts, and Workspace
 admins can disable Colab as an additional service); self-hosted JupyterHub
@@ -74,7 +74,7 @@ patikrink(1)
 ```
 
 Ships pre-filled so running it works immediately — nobody faces a blank cell.
-`patikrink(1)` detects the untouched placeholder and asks for their own data.
+`patikrink(1)` simply prints `✅ 1 lygis įveiktas!`. It inspects nothing.
 
 **Level 2 — "Ką mėgsti?"** · list, keyword argument
 
@@ -101,13 +101,12 @@ neighbour.
 **Level 4 — "Laisvas režimas"** · open brief, no template
 
 - **a)** Write `slapyvardis_is(vardas, amzius)` as a reusable function.
-  `patikrink(4)` calls it with its own inputs and reports what it found.
+  Nothing checks it — level 4 is a free-play area.
 - **b)** Random fact per run via `random.choice`.
 - **c)** `rodyk_kortele` accepts an undocumented `tema=` argument. Which themes
   exist? The answer is in `kortele.py`, open from the file browser.
 
-`patikrink(4)` never reports failure — it reports what it detected and
-encourages. Level 4 has no single correct answer.
+Level 4 has no `patikrink` call at all and no feedback of any kind.
 
 ### 4.2 Challenge 2 — Flagų misija
 
@@ -214,7 +213,7 @@ says so explicitly.
 def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *,
                   pomegiai=None, slapyvardis=None, tema="klasika",
                   bendri_interesai=None) -> None
-def patikrink(lygis, *, erdve=None) -> None
+def patikrink(lygis) -> None  # prints one line; verifies nothing
 ```
 
 `rodyk_kortele` renders and prints the card. Optional fields are omitted when
@@ -266,7 +265,7 @@ from it at build time. The starter cells and the checks cannot drift apart.
 ```python
 def normalizuok(vardas) -> str
 def generuok_flaga(vardas, klases_kodas) -> str
-def pradek_misija(vardas, klases_kodas, *, tikslas=3) -> None
+def pradek_misija(vardas, klases_kodas) -> None
 def irasyk_flaga(vardas, flagas, bendras_interesas) -> None
 def misijos_bukle() -> None
 def surinkti() -> list[tuple[str, str]]     # [(display name, shared interest)]

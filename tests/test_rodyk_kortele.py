@@ -49,13 +49,6 @@ def test_apkarpyk_vieno_plocio_grazina_elipsi():
     assert kortele._apkarpyk("abc", 1) == "…"
 
 
-@pytest.fixture(autouse=True)
-def svari_kortele():
-    kortele._atstatyk()
-    yield
-    kortele._atstatyk()
-
-
 def _eilutes(capsys):
     return [e for e in capsys.readouterr().out.split("\n") if e]
 
@@ -126,33 +119,23 @@ def test_pomegiai_ne_sarasas_duoda_zinute(capsys):
 def test_bendri_interesai_tekstas_duoda_zinute(capsys):
     kortele.rodyk_kortele("Birutė", 16, "robotas", "faktas", bendri_interesai="krepšinis")
     assert "bendri_interesai" in capsys.readouterr().out
-    assert kortele._paskutine_kortele is None
 
 
 def test_bendri_interesai_sarasas_tekstu_duoda_zinute(capsys):
     kortele.rodyk_kortele("Birutė", 16, "robotas", "faktas",
                           bendri_interesai=["Tomas", "krepšinis"])
     assert "bendri_interesai" in capsys.readouterr().out
-    assert kortele._paskutine_kortele is None
 
 
 def test_bendri_interesai_netinkamo_ilgio_poros_duoda_zinute(capsys):
     kortele.rodyk_kortele("Birutė", 16, "robotas", "faktas",
                           bendri_interesai=[("Tomas", "krepšinis", "papildomai")])
     assert "bendri_interesai" in capsys.readouterr().out
-    assert kortele._paskutine_kortele is None
 
 
 def test_bloga_ivestis_nepalieka_paskutines_korteles(capsys):
     kortele.rodyk_kortele("Birutė", "16", "robotas", "faktas")
-    assert kortele._paskutine_kortele is None
 
-
-def test_paskutine_kortele_irasoma(capsys):
-    kortele.rodyk_kortele("Birutė", 16, "robotas", "faktas", pomegiai=["a", "b"])
-    assert kortele._paskutine_kortele["vardas"] == "Birutė"
-    assert kortele._paskutine_kortele["pomegiai"] == ["a", "b"]
-    assert kortele._paskutine_kortele["slapyvardis"] is None
 
 
 def test_bendri_interesai_paimami_is_misijos_kai_nenurodyti(capsys):
@@ -171,7 +154,6 @@ def test_bendri_interesai_paimami_is_misijos_kai_nenurodyti(capsys):
 def test_slapyvardis_ne_tekstas_duoda_zinute(capsys):
     kortele.rodyk_kortele("Birutė", 16, "robotas", "faktas", slapyvardis=42)
     assert "slapyvardis" in capsys.readouterr().out
-    assert kortele._paskutine_kortele is None
 
 
 # Minor fix: kortelė rodė „su Tomas – krepšinis“; taisyklinga lietuvių kalba

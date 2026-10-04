@@ -116,13 +116,14 @@ Trumpai, kas kiekviename:
   (`f"{vardas[:3].upper()}-{amzius * 2}"`), perduoda `slapyvardis=slapyvardis`.
 - **4 lygis (laisvas)** — demonstruoja a) funkciją `slapyvardis_is(vardas,
   amzius)`, b) `random.choice(...)` tarp kelių faktų, c) slaptą temą
-  (`tema="matrix"`). Čia teisingo atsakymo nėra — `patikrink(4)` visada
-  tik aprašo, ką rado.
+  (`tema="matrix"`). Čia teisingo atsakymo nėra ir niekas netikrina —
+  mokiniai tiesiog bando.
 
 **Kai mokinys įstrigo — ką paleisti pirmiausia:**
 
-- `patikrink(1)` / `patikrink(2)` / `patikrink(3)` — pasako, kurio kintamojo
-  trūksta arba kuris dar neperduotas kortelei.
+- `patikrink(1..3)` tik pažymi lygį kaip atliktą — nieko netikrina. Jei
+  mokiniui nesiseka, pagalba ateina iš tavęs, ne iš kodo: pažiūrėk į jo
+  langelį ir paklausk, ką jis norėjo padaryti.
 - `misijos_bukle()` — parodo, ar mokinys apskritai užsiregistravo
   (`pradek_misija`), kiek flagų jau surinkta ir su kuo. Jei ji sako
   „Pirmiausia paleisk langelį su pradek_misija(...)“ — visa misijos dalis jam

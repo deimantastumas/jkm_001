@@ -1,8 +1,8 @@
 """Pavyzdiniai sprendimai mokytojui.
 
-Kiekviena funkcija grąžina erdvę (dict), kurią galima perduoti
-`kortele._ivertink(lygis, erdve)`. Testai tuo naudojasi, kad patikros ir
-atsakymai niekada neišsiskirtų.
+Kiekviena funkcija atvaizduoja to lygio kortelę ir grąžina erdvę (dict) su
+reikšmėmis, kurias naudojo — taip kitas lygis gali remtis ankstesniu.
+Automatinio tikrinimo nebėra: mokytojas pats padeda, jei kam nesiseka.
 """
 
 import random

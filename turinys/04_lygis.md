@@ -5,7 +5,7 @@ Pasirinkite bent vieną užduotį arba sugalvokite savo:
 
 **a) Slapyvardžių generatorius.** Parašykite funkciją
 `slapyvardis_is(vardas, amzius)`, kuri grąžina slapyvardį bet kam — ne tik
-jums. `patikrink(4)` ją išbandys su savais duomenimis.
+jums. Išbandykite ją su kelių žmonių vardais.
 
 **b) Atsitiktinis faktas.** Susikurkite kelių faktų sąrašą ir padarykite, kad
 kortelė kaskart rodytų vis kitą. Užuomina: `import random` ir `random.choice(...)`.
@@ -13,3 +13,6 @@ kortelė kaskart rodytų vis kitą. Užuomina: `import random` ir `random.choice
 **c) Kortelės tema.** `rodyk_kortele` turi slaptą argumentą `tema=`. Kokios
 temos egzistuoja? Atsakymas yra faile `kortele.py` — atidarykite jį kairėje
 esančiame failų sąraše.
+
+Čia niekas netikrina ir nevertina — eksperimentuokite laisvai.
+Jei kas nors nepavyksta, pakvieskite mokytoją.

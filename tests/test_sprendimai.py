@@ -4,18 +4,13 @@ import kortele
 import sprendimai
 
 
-@pytest.fixture(autouse=True)
-def svari_kortele():
-    kortele._atstatyk()
-    yield
-    kortele._atstatyk()
-
-
 @pytest.mark.parametrize("lygis", [1, 2, 3, 4])
-def test_pavyzdinis_sprendimas_praeina_savo_lygio_patikra(lygis, capsys):
+def test_pavyzdinis_sprendimas_atvaizduoja_kortele(lygis, capsys):
+    """Mokytojas šiuos rodo klasei — jie privalo nulūžti niekada."""
     erdve = getattr(sprendimai, f"sprendimas_{lygis}")()
-    praejo, eilutes = kortele._ivertink(lygis, erdve)
-    assert praejo is True, "\n".join(eilutes)
+    isvestis = capsys.readouterr().out
+    assert erdve["vardas"] in isvestis.upper() or erdve["vardas"].upper() in isvestis
+    assert "Traceback" not in isvestis
 
 
 @pytest.mark.parametrize("lygis", [1, 2, 3, 4])

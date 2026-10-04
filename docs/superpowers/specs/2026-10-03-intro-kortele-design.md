@@ -219,8 +219,17 @@ def patikrink(lygis, *, erdve=None) -> None
 
 `rodyk_kortele` renders and prints the card. Optional fields are omitted when
 `None`, so the same call signature grows across levels. Themes differ by border
-characters and accent emoji; at least `"klasika"`, `"matrix"`, `"neonas"`
-exist. Invalid input never raises: a wrong type or an unknown theme prints a
+characters **and colour**; at least `"klasika"`, `"matrix"`, `"neonas"`
+exist. `klasika` is uncoloured, `matrix` is bright green on an ASCII frame
+(an old-terminal look), `neonas` is bright magenta on heavy box-drawing.
+
+Colour is ANSI SGR, which Jupyter and JupyterLite render as real colour and
+which costs no dependency. It is applied **only to a finished, fully padded
+line**, immediately before printing, by `_nuspalvink`. Applying it any
+earlier would put escape sequences into the text that `_plotis` measures —
+it counts them as visible characters, so a coloured 6-character name
+measures 15 and the border tears open. This ordering is the whole reason
+the helper exists, and `test_spalvotos_temos_islaiko_ploti` pins it. Invalid input never raises: a wrong type or an unknown theme prints a
 Lithuanian sentence explaining the fix. Long field values are truncated to the
 card width rather than breaking the box.
 

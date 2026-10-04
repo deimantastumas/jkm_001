@@ -15,13 +15,22 @@ _EMOJI_REZIAI = (
     (0x2600, 0x27BF),
 )
 
+# ANSI spalvų kodai. Jupyter (ir JupyterLite) juos atvaizduoja kaip tikras
+# spalvas. Spalva uždedama TIK ant galutinės, jau užpildytos eilutės — jei
+# kodai patektų į tekstą anksčiau, `_plotis` juos skaičiuotų kaip matomus
+# simbolius ir rėmelis sulūžtų.
+_SPALVU_PABAIGA = "\033[0m"
+
 _TEMOS = {
     "klasika": {"vk": "╔", "vd": "╗", "ak": "╚", "ad": "╝",
-                "h": "═", "v": "║", "sk": "╠", "sd": "╣"},
+                "h": "═", "v": "║", "sk": "╠", "sd": "╣",
+                "spalva": ""},
     "matrix":  {"vk": "+", "vd": "+", "ak": "+", "ad": "+",
-                "h": "-", "v": "|", "sk": "+", "sd": "+"},
+                "h": "-", "v": "|", "sk": "+", "sd": "+",
+                "spalva": "\033[92m"},
     "neonas":  {"vk": "┏", "vd": "┓", "ak": "┗", "ad": "┛",
-                "h": "━", "v": "┃", "sk": "┣", "sd": "┫"},
+                "h": "━", "v": "┃", "sk": "┣", "sd": "┫",
+                "spalva": "\033[95m"},
 }
 
 
@@ -91,6 +100,18 @@ def _lauzyk(tekstas, plotis):
     if dabartine:
         eilutes.append(dabartine)
     return eilutes or [""]
+
+
+def _nuspalvink(eilutes, tema):
+    """Apgaubia kiekvieną GATAVĄ eilutę temos spalva.
+
+    Daroma paskutiniu žingsniu, kai eilutės jau užpildytos iki `_VIDUS`, kad
+    ANSI kodai niekada nepatektų į pločio skaičiavimą.
+    """
+    spalva = tema.get("spalva", "")
+    if not spalva:
+        return eilutes
+    return [f"{spalva}{e}{_SPALVU_PABAIGA}" for e in eilutes]
 
 
 def _eilutes_su_lauzymu(tekstas, iktrauka, tema):
@@ -204,7 +225,7 @@ def rodyk_kortele(vardas, amzius, svajoniu_projektas, faktas, *, pomegiai=None,
             eilutes.append(_eilute(f"    {draugas} – {interesas}", t))
 
     eilutes.append(apacia)
-    print("\n".join(eilutes))
+    print("\n".join(_nuspalvink(eilutes, t)))
 
     _paskutine_kortele = {
         "vardas": vardas, "amzius": amzius,

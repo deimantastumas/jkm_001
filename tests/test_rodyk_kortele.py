@@ -238,3 +238,59 @@ def test_ilgas_faktas_taip_pat_lauzomas(capsys):
     isvestis = capsys.readouterr().out
     assert "be sustojimo" in isvestis
     assert "…" not in isvestis
+
+
+# --- Temų spalvos ----------------------------------------------------------
+#
+# Spalva uždedama TIK ant jau paruoštos, iki galo užpildytos eilutės. Jei
+# ANSI kodai patektų į tekstą prieš skaičiuojant plotį, `_plotis` juos
+# skaičiuotų kaip matomus simbolius ir rėmelis sulūžtų — tai tikrinama
+# atskirai (`test_spalvotos_temos_islaiko_ploti`).
+
+import re
+
+ANSI = re.compile(r"\033\[[0-9;]*m")
+
+
+def _be_spalvu(tekstas):
+    return ANSI.sub("", tekstas)
+
+
+def test_klasika_lieka_be_spalvu(capsys):
+    kortele.rodyk_kortele("Birutė", 17, "robotas", "faktas", tema="klasika")
+    assert "\033[" not in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("tema", ["matrix", "neonas"])
+def test_spalvotos_temos_apgaubia_kiekviena_eilute(tema, capsys):
+    kortele.rodyk_kortele("Birutė", 17, "robotas", "faktas", tema=tema)
+    spalva = kortele._TEMOS[tema]["spalva"]
+    for eilute in _eilutes(capsys):
+        assert eilute.startswith(spalva)
+        assert eilute.endswith("\033[0m")
+
+
+@pytest.mark.parametrize("tema", ["matrix", "neonas"])
+def test_spalvotos_temos_islaiko_ploti(tema, capsys):
+    """Rėmelis turi likti lygus — ANSI kodai nesiskaičiuoja kaip plotis."""
+    kortele.rodyk_kortele(
+        "Birutė", 17, "žaidimas, kuriame katinai valdo kosminius laivus",
+        "turiu du šunis", pomegiai=["krepšinis", "fotografija"], tema=tema,
+    )
+    plociai = {kortele._plotis(_be_spalvu(e)) for e in _eilutes(capsys)}
+    assert plociai == {48}
+
+
+def test_tema_keicia_tik_isvaizda_ne_turini(capsys):
+    kortele.rodyk_kortele("Birutė", 17, "robotas", "faktas", tema="klasika")
+    klasikine = [_be_spalvu(e) for e in _eilutes(capsys)]
+    kortele.rodyk_kortele("Birutė", 17, "robotas", "faktas", tema="matrix")
+    matricine = [_be_spalvu(e) for e in _eilutes(capsys)]
+    assert len(klasikine) == len(matricine)
+    for k, m in zip(klasikine, matricine):
+        assert k.strip("╔╗╚╝═║╠╣+-| ") == m.strip("╔╗╚╝═║╠╣+-| ")
+
+
+def test_kiekviena_tema_turi_spalvos_rakta():
+    for vardas, tema in kortele._TEMOS.items():
+        assert "spalva" in tema, f"temai {vardas} trūksta `spalva` rakto"

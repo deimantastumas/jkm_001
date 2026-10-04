@@ -13,6 +13,3 @@ kortelė kaskart rodytų vis kitą. Užuomina: `import random` ir `random.choice
 **c) Kortelės tema.** `rodyk_kortele` turi slaptą argumentą `tema=`. Kokios
 temos egzistuoja? Atsakymas yra faile `kortele.py` — atidarykite jį kairėje
 esančiame failų sąraše.
-
-Čia niekas netikrina ir nevertina — eksperimentuokite laisvai.
-Jei kas nors nepavyksta, pakvieskite mokytoją.
